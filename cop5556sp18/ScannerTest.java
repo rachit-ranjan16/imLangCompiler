@@ -180,7 +180,56 @@ public class ScannerTest {
 		checkNext(scanner, RPAREN, 1, 1, 1, 2);
 		checkNextIsEOF(scanner);
 	}
-	
+
+	@Test
+	public void testAllBracketsBalanced() throws LexicalException {
+		String inp = "[{()}]";
+		Scanner scanner = new Scanner(inp).scan();
+		show(inp);
+		show(scanner);
+		checkNext(scanner, LSQUARE, 0, 1, 1,1);
+		checkNext(scanner, LBRACE, 1, 1, 1,2);
+		checkNext(scanner, LPAREN, 2, 1, 1,3);
+		checkNext(scanner, RPAREN, 3, 1, 1,4);
+		checkNext(scanner, RBRACE, 4, 1, 1,5);
+		checkNext(scanner, RSQUARE, 5, 1, 1,6);
+	}
+
+	@Test
+	public void testAllBracketsUnbalanced() throws LexicalException {
+		String inp = "]})\n({[";
+		Scanner scanner = new Scanner(inp).scan();
+		show(inp);
+		show(scanner);
+		checkNext(scanner, RSQUARE, 0, 1, 1,1);
+		checkNext(scanner, RBRACE, 1, 1, 1,2);
+		checkNext(scanner, RPAREN, 2, 1, 1,3);
+		checkNext(scanner, LPAREN, 4, 1, 2,1);
+		checkNext(scanner, LBRACE, 5, 1, 2,2);
+		checkNext(scanner, LSQUARE, 6, 1, 2,3);
+	}
+
+	@Test
+	public void testSeparators() throws LexicalException {
+		String inp = "{\n ;\n;\n[  ];\n(,) \n(.);\n}";
+		Scanner scanner = new Scanner(inp).scan();
+		show(inp);
+		show(scanner);
+		checkNext(scanner, LBRACE,0,1,1,1);
+		checkNext(scanner, SEMI,3,1,2,2);
+		checkNext(scanner, SEMI,5,1,3,1);
+		checkNext(scanner, LSQUARE,7,1,4,1);
+		checkNext(scanner, RSQUARE,10,1,4,4);
+		checkNext(scanner, SEMI,11,1,4,5);
+		checkNext(scanner, LPAREN,13,1,5,1);
+		checkNext(scanner, COMMA,14,1,5,2);
+		checkNext(scanner, RPAREN,15,1,5,3);
+		checkNext(scanner, LPAREN,18,1,6,1);
+		checkNext(scanner, DOT,19,1,6,2);
+		checkNext(scanner, RPAREN,20,1,6,3);
+		checkNext(scanner, SEMI,21,1,6,4);
+		checkNext(scanner, RBRACE,23,1,7,1);
+	}
 
 	
 }

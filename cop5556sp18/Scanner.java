@@ -314,7 +314,98 @@ public class Scanner {
 							pos++;
 						}
 						break;
+						case ',': {
+							tokens.add(new Token(Kind.COMMA, startPos, pos - startPos + 1));
+							pos++;
+						}
+						break;
+						case '(': {
+							tokens.add(new Token(Kind.LPAREN, startPos, pos - startPos + 1));
+							pos++;
+						}
+						break;
+						case '.': {
+							tokens.add(new Token(Kind.DOT, startPos, pos - startPos + 1));
+							pos++;
+						}
+						break;
+						case ')': {
+							tokens.add(new Token(Kind.RPAREN, startPos, pos - startPos + 1));
+							pos++;
+						}
+						break;
+						case '[': {
+							tokens.add(new Token(Kind.LSQUARE, startPos, pos - startPos + 1));
+							pos++;
+						}
+						break;
+						case ']': {
+							tokens.add(new Token(Kind.RSQUARE, startPos, pos - startPos + 1));
+							pos++;
+						}
+						break;
+						case '{': {
+							tokens.add(new Token(Kind.LBRACE, startPos, pos - startPos + 1));
+							pos++;
+						}
+						break;
+						case '}': {
+							tokens.add(new Token(Kind.RBRACE, startPos, pos - startPos + 1));
+							pos++;
+						}
+						break;
+						//TODO Handle MultiCharacter Separators
+//						case '<': {
+//							tokens.add(new Token(Kind.LPIXEL, startPos, pos - startPos + 1));
+//							pos++;
+//						}
+//						break;
+//						case '>': {
+//							if (tokens.get(tokens.size() - 1).getText() != ">")
+//							tokens.add(new Token(Kind.RPIXEL, startPos, pos - startPos + 1));
+//							pos++;
+//						}
+//						break;
+						//TODO Handle Operators
+//						case '+': {
+//							tokens.add(new Token(Kind.OP_PLUS, startPos, pos - startPos + 1));
+//							pos++;
+//						}
+//						break;
+//						case '-': {
+//							tokens.add(new Token(Kind.OP_MINUS, startPos, pos - startPos + 1));
+//							pos++;
+//						}
+//						break;
+//						case '/': {
+//							tokens.add(new Token(Kind.OP_DIV, startPos, pos - startPos + 1));
+//							pos++;
+//						}
+//						break;
+//						case '&': {
+//							tokens.add(new Token(Kind.OP_AND, startPos, pos - startPos + 1));
+//							pos++;
+//						}
+//						break;
+//						case '%': {
+//							tokens.add(new Token(Kind.OP_MOD, startPos, pos - startPos + 1));
+//							pos++;
+//						}
+//						break;
+//						case '|': {
+//							tokens.add(new Token(Kind.OP_OR, startPos, pos - startPos + 1));
+//							pos++;
+//						}
+//						break;
+//						case '@': {
+//							tokens.add(new Token(Kind.OP_AT, startPos, pos - startPos + 1));
+//							pos++;
+//						}
+//						break;
+
 						default: {
+//							TODO Remove this print
+							System.out.println(ch);
 							error(pos, line(pos), posInLine(pos), "illegal char");
 						}
 					}//switch ch
