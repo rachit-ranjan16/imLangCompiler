@@ -92,8 +92,6 @@ public class ScannerTest {
 		assertEquals(length, t.length);
 		return t;
 	}
-	
-
 
 	/**
 	 * Simple test case with an empty program.  The only Token will be the EOF Token.
@@ -136,8 +134,6 @@ public class ScannerTest {
 		checkNext(scanner, SEMI, 4, 1, 2, 2);
 		checkNextIsEOF(scanner);
 	}
-	
-
 	
 	/**
 	 * This example shows how to test that your scanner is behaving when the
