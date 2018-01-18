@@ -354,54 +354,104 @@ public class Scanner {
 							pos++;
 						}
 						break;
-						//TODO Handle MultiCharacter Separators
-//						case '<': {
-//							tokens.add(new Token(Kind.LPIXEL, startPos, pos - startPos + 1));
-//							pos++;
-//						}
-//						break;
-//						case '>': {
-//							if (tokens.get(tokens.size() - 1).getText() != ">")
-//							tokens.add(new Token(Kind.RPIXEL, startPos, pos - startPos + 1));
-//							pos++;
-//						}
-//						break;
-						//TODO Handle Operators
-//						case '+': {
-//							tokens.add(new Token(Kind.OP_PLUS, startPos, pos - startPos + 1));
-//							pos++;
-//						}
-//						break;
-//						case '-': {
-//							tokens.add(new Token(Kind.OP_MINUS, startPos, pos - startPos + 1));
-//							pos++;
-//						}
-//						break;
-//						case '/': {
-//							tokens.add(new Token(Kind.OP_DIV, startPos, pos - startPos + 1));
-//							pos++;
-//						}
-//						break;
-//						case '&': {
-//							tokens.add(new Token(Kind.OP_AND, startPos, pos - startPos + 1));
-//							pos++;
-//						}
-//						break;
-//						case '%': {
-//							tokens.add(new Token(Kind.OP_MOD, startPos, pos - startPos + 1));
-//							pos++;
-//						}
-//						break;
-//						case '|': {
-//							tokens.add(new Token(Kind.OP_OR, startPos, pos - startPos + 1));
-//							pos++;
-//						}
-//						break;
-//						case '@': {
-//							tokens.add(new Token(Kind.OP_AT, startPos, pos - startPos + 1));
-//							pos++;
-//						}
-//						break;
+						case '<': {
+							//Handling Separator <<
+							if (chars[pos + 1] == '<') {
+								tokens.add(new Token(Kind.LPIXEL, startPos, pos - startPos + 2));
+								pos += 2;
+							}
+							//Handling Operator <=
+							else if (chars[pos + 1] == '=') {
+								tokens.add(new Token(Kind.OP_LE, startPos, pos - startPos + 2));
+								pos += 2;
+							}
+							//Handling Operator <
+							else {
+								tokens.add(new Token(Kind.OP_LT, startPos, pos - startPos + 1));
+								pos++;
+							}
+						}
+						break;
+						case '>': {
+							//Handling Separator <<
+							if (chars[pos + 1] == '>') {
+								tokens.add(new Token(Kind.RPIXEL, startPos, pos - startPos + 2));
+								pos += 2;
+							}
+							//Handling Operator >=
+							else if (chars[pos + 1] == '=') {
+								tokens.add(new Token(Kind.OP_GE, startPos, pos - startPos + 2));
+								pos += 2;
+							}
+							//Handling Operator >
+							else {
+								tokens.add(new Token(Kind.OP_GT, startPos, pos - startPos + 1));
+								pos++;
+							}
+						}
+						break;
+						case '?': {
+							tokens.add(new Token(Kind.OP_QUESTION, startPos, pos - startPos + 1));
+							pos++;
+						}
+						break;
+						case '+': {
+							tokens.add(new Token(Kind.OP_PLUS, startPos, pos - startPos + 1));
+							pos++;
+						}
+						break;
+						case '-': {
+							tokens.add(new Token(Kind.OP_MINUS, startPos, pos - startPos + 1));
+							pos++;
+						}
+						break;
+						case '/': {
+							tokens.add(new Token(Kind.OP_DIV, startPos, pos - startPos + 1));
+							pos++;
+						}
+						break;
+						case '&': {
+							tokens.add(new Token(Kind.OP_AND, startPos, pos - startPos + 1));
+							pos++;
+						}
+						break;
+						case '%': {
+							tokens.add(new Token(Kind.OP_MOD, startPos, pos - startPos + 1));
+							pos++;
+						}
+						break;
+						case '|': {
+							tokens.add(new Token(Kind.OP_OR, startPos, pos - startPos + 1));
+							pos++;
+						}
+						break;
+						case '!': {
+							//Handling Operator !=
+							if (chars[pos + 1] == '=') {
+								tokens.add(new Token(Kind.OP_NEQ, startPos, pos - startPos + 2));
+								pos += 2;
+							}
+							//Handling Operator !
+							else {
+								tokens.add(new Token(Kind.OP_EXCLAMATION, startPos, pos - startPos + 1));
+								pos++;
+							}
+						}
+						break;
+						case ':': {
+							//Handling Operator :=
+							if (chars[pos + 1] == '=') {
+								tokens.add(new Token(Kind.OP_ASSIGN, startPos, pos - startPos + 2));
+								pos += 2;
+							}
+							//Handling Operator :
+							else {
+								tokens.add(new Token(Kind.OP_COLON, startPos, pos - startPos + 1));
+								pos++;
+							}
+						}
+						break;
+
 
 						default: {
 //							TODO Remove this print

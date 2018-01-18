@@ -231,6 +231,17 @@ public class ScannerTest {
 		checkNext(scanner, RBRACE,23,1,7,1);
 	}
 
+	@Test
+	public void testLTGTVariations() throws LexicalException {
+		String inp = "<<\n>=\n<";
+		Scanner scanner = new Scanner(inp).scan();
+		show(inp);
+		show(scanner);
+		checkNext(scanner, LPIXEL,0,2,1,1);
+		checkNext(scanner, OP_GE,3,2,2,1);
+		checkNext(scanner, OP_LT,6,1,3,1);
+	}
+
 	
 }
 	
