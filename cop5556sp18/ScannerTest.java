@@ -167,9 +167,6 @@ public class ScannerTest {
 		}
 	}
 
-
-
-
 	@Test
 	public void testParens() throws LexicalException {
 		String input = "()";
@@ -242,6 +239,36 @@ public class ScannerTest {
 		checkNext(scanner, OP_LT,6,1,3,1);
 	}
 
+	@Test
+	public void testMultiCharOperators() throws LexicalException {
+		String inp = "+-!!=::=***@";
+		Scanner scanner = new Scanner(inp).scan();
+		show(inp);
+		show(scanner);
+		checkNext(scanner, OP_PLUS,0,1,1,1);
+		checkNext(scanner, OP_MINUS,1,1,1,2);
+		checkNext(scanner, OP_EXCLAMATION,2,1,1,3);
+		checkNext(scanner, OP_NEQ,3,2,1,4);
+		checkNext(scanner, OP_COLON,5,1,1,6);
+		checkNext(scanner, OP_ASSIGN,6,2,1,7);
+		checkNext(scanner, OP_POWER,8,2,1,9);
+		checkNext(scanner, OP_TIMES,10,1,1,11);
+		checkNext(scanner, OP_AT,11,1,1,12);
+	}
+
+	@Test
+	public void testIllegalOperator() throws LexicalException {
+		String input = ">=|=";
+		show(input);
+		thrown.expect(LexicalException.class);  //Tell JUnit to expect a LexicalException
+		try {
+			show(new Scanner(input).scan());
+		} catch (LexicalException e) {  //Catch the exception
+			show(e);                    //Display it
+			assertEquals(3,e.getPos()); //Check that it occurred in the expected position
+			throw e;                    //Rethrow exception so JUnit will see it
+		}
+	}
 	
 }
 	

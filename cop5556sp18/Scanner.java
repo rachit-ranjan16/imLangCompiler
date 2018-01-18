@@ -425,6 +425,21 @@ public class Scanner {
 							pos++;
 						}
 						break;
+						case '@': {
+							tokens.add(new Token(Kind.OP_AT, startPos, pos - startPos + 1));
+							pos++;
+						}
+						break;
+						case '=': {
+							if (chars[pos + 1] == '=') {
+								tokens.add(new Token(Kind.OP_EQ, startPos, pos - startPos + 2));
+								pos += 2;
+							}
+							else {
+								error(pos, line(pos), posInLine(pos), "illegal char");
+							}
+						}
+						break;
 						case '!': {
 							//Handling Operator !=
 							if (chars[pos + 1] == '=') {
@@ -451,7 +466,19 @@ public class Scanner {
 							}
 						}
 						break;
-
+						case '*': {
+							//Handling Operator **
+							if (chars[pos + 1] == '*') {
+								tokens.add(new Token(Kind.OP_POWER, startPos, pos - startPos + 2));
+								pos += 2;
+							}
+							//Handling Operator *
+							else {
+								tokens.add(new Token(Kind.OP_TIMES, startPos, pos - startPos + 1));
+								pos++;
+							}
+						}
+						break;
 
 						default: {
 //							TODO Remove this print
