@@ -15,7 +15,6 @@ package cop5556sp18;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-//import java.util.HashMap;
 
 public class Scanner {
 
