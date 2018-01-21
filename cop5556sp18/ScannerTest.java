@@ -268,27 +268,14 @@ public class ScannerTest {
 
 	@Test
 	public void testValidComment() throws LexicalException {
-		String inp = ">/***********/<<";
+		String inp = ">/* Some Comment */<<";
 		Scanner scanner = new Scanner(inp).scan();
 		show(inp);
 		show(scanner);
 		checkNext(scanner, OP_GT,0,1,1,1);
-		checkNext(scanner, LPIXEL,14,2,1,15);
+		checkNext(scanner, LPIXEL,19,2,1,20);
 	}
 
-	@Test
-	public void testInvalidComment() throws LexicalException {
-		String inp = "<!=>/***Something*/*/";
-		show(inp);
-		thrown.expect(LexicalException.class);
-		try {
-			show(new Scanner(inp).scan());
-		} catch (LexicalException e) {
-			show(e);
-			assertEquals(8,e.getPos());
-			throw e;
-		}
-	}
 
 	@Test
 	public void testBoolean() throws LexicalException {
@@ -329,13 +316,13 @@ public class ScannerTest {
 		checkNext(scanner, FLOAT_LITERAL,9,3,1,10);
 		checkNext(scanner, OP_TIMES,12,1,1,13);
 		checkNext(scanner, FLOAT_LITERAL,13,3,1,14);
-		inp = ".23+.345";
+		inp = ".23 + .345";
 		scanner = new Scanner(inp).scan();
 		show(inp);
 		show(scanner);
 		checkNext(scanner, FLOAT_LITERAL,0,3,1,1);
-		checkNext(scanner, OP_PLUS,3,1,1,4);
-		checkNext(scanner, FLOAT_LITERAL,4,4,1,5);
+		checkNext(scanner, OP_PLUS,4,1,1,5);
+		checkNext(scanner, FLOAT_LITERAL,6,4,1,7);
 
 	}
 
@@ -355,7 +342,33 @@ public class ScannerTest {
 		checkNext(scanner, LPIXEL,35,2,1,36);
 		checkNext(scanner, KW_Z,37,1,1,38);
 	}
-	
+
+	@Test
+	public void testLineOfCode() throws LexicalException {
+		String inp = "default_width := blue_not$kw + cart_x ** pola2r_Bb <<  Z\n\talpha :=\tawesome ** sin .234 + atan 66";
+		Scanner scanner = new Scanner(inp).scan();
+		show(inp);
+		show(scanner);
+		checkNext(scanner, KW_default_width,0,13,1,1);
+		checkNext(scanner, OP_ASSIGN,14,2,1,15);
+		checkNext(scanner, IDENTIFIER,17,11,1,18);
+		checkNext(scanner, OP_PLUS,29,1,1,30);
+		checkNext(scanner, KW_cart_x,31,6,1,32);
+		checkNext(scanner, OP_POWER,38,2,1,39);
+		checkNext(scanner, IDENTIFIER,41,9,1,42);
+		checkNext(scanner, LPIXEL,51,2,1,52);
+		checkNext(scanner, KW_Z,55,1,1,56);
+		checkNext(scanner, KW_alpha,58,5,2,2);
+		checkNext(scanner, OP_ASSIGN,64,2,2,8);
+		checkNext(scanner, IDENTIFIER,67,7,2,11);
+		checkNext(scanner, OP_POWER,75,2,2,19);
+		checkNext(scanner, KW_sin,78,3,2,22);
+		checkNext(scanner, FLOAT_LITERAL,82,4,2,26);
+		checkNext(scanner, OP_PLUS,87,1,2,31);
+		checkNext(scanner, KW_atan,89,4,2,33);
+		checkNext(scanner, INTEGER_LITERAL,94,2,2,38);
+	}
+
 }
 	
 

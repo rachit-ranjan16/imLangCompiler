@@ -278,7 +278,7 @@ public class Scanner {
 		lineStarts = initLineStarts();
 	}
 
-	 private enum State {START, ERROR};
+	 private enum State {START, ERROR, END}
 
 
 	public Scanner scan() throws LexicalException {
@@ -301,7 +301,8 @@ public class Scanner {
 						break;
 						case EOFChar: {
 							tokens.add(new Token(Kind.EOF, startPos, 0));
-							pos++; // next iteration will terminate loop
+							state = State.END;
+							pos++;
 						}
 						break;
 						case ';': {
@@ -420,10 +421,12 @@ public class Scanner {
 							}
 							//Handling Comments
 							else {
-								pos++;
-								while (chars[pos] == '*') pos++;
-								if (chars[pos] != '/') state = State.ERROR;
-								else pos++;
+								pos+=2;
+								char some_ch = chars[pos];
+								boolean check = chars[pos] != '*';
+								while (chars[pos] != '*') pos++;
+								if (chars[pos + 1] != '/') state = State.ERROR;
+								else pos+=2;
 							}
 						}
 						break;
@@ -540,6 +543,7 @@ public class Scanner {
 							}
 							//Check for Identifiers + Keywords
 							else if(Character.isAlphabetic(ch)) {
+								boolean isKW = false;
 								//Extract alphabets till none are left - this will only
 								String word = "";
 								while(Character.isAlphabetic(chars[pos])) {
@@ -547,60 +551,58 @@ public class Scanner {
 									if (chars[pos] == '_') word+= chars[pos++]; // || chars[pos] =='$')
 								}
 								switch(word) {
-									case "Z": tokens.add(new Token(Kind.KW_Z, startPos, word.length())); break;
-									case "default_width": tokens.add(new Token(Kind.KW_default_width, startPos, word.length())); break;
-									case "default_height": tokens.add(new Token(Kind.KW_default_height, startPos, word.length())); break;
-									case "show": tokens.add(new Token(Kind.KW_show, startPos, word.length())); break;
-									case "write": tokens.add(new Token(Kind.KW_write, startPos, word.length())); break;
-									case "to": tokens.add(new Token(Kind.KW_to, startPos, word.length())); break;
-									case "input": tokens.add(new Token(Kind.KW_input, startPos, word.length())); break;
-									case "from": tokens.add(new Token(Kind.KW_from, startPos, word.length())); break;
-									case "cart_x": tokens.add(new Token(Kind.KW_cart_x, startPos, word.length())); break;
-									case "cart_y": tokens.add(new Token(Kind.KW_cart_y, startPos, word.length())); break;
-									case "polar_a": tokens.add(new Token(Kind.KW_polar_a, startPos, word.length())); break;
-									case "polar_r": tokens.add(new Token(Kind.KW_polar_r, startPos, word.length())); break;
-									case "abs": tokens.add(new Token(Kind.KW_abs, startPos, word.length())); break;
-									case "sin": tokens.add(new Token(Kind.KW_sin, startPos, word.length())); break;
-									case "cos": tokens.add(new Token(Kind.KW_cos, startPos, word.length())); break;
-									case "atan": tokens.add(new Token(Kind.KW_atan, startPos, word.length())); break;
-									case "log": tokens.add(new Token(Kind.KW_log, startPos, word.length())); break;
-									case "image": tokens.add(new Token(Kind.KW_image, startPos, word.length())); break;
-									case "int": tokens.add(new Token(Kind.KW_int, startPos, word.length())); break;
-									case "float": tokens.add(new Token(Kind.KW_float, startPos, word.length())); break;
-									case "filename": tokens.add(new Token(Kind.KW_filename, startPos, word.length())); break;
-									case "boolean": tokens.add(new Token(Kind.KW_boolean, startPos, word.length())); break;
-									case "red": tokens.add(new Token(Kind.KW_red, startPos, word.length())); break;
-									case "blue": tokens.add(new Token(Kind.KW_blue, startPos, word.length())); break;
-									case "green": tokens.add(new Token(Kind.KW_green, startPos, word.length())); break;
-									case "alpha": tokens.add(new Token(Kind.KW_alpha, startPos, word.length())); break;
-									case "while": tokens.add(new Token(Kind.KW_while, startPos, word.length())); break;
-									case "width": tokens.add(new Token(Kind.KW_width, startPos, word.length())); break;
-									case "height": tokens.add(new Token(Kind.KW_height, startPos, word.length())); break;
+									case "Z": tokens.add(new Token(Kind.KW_Z, startPos, word.length())); isKW=true; break;
+									case "default_width": tokens.add(new Token(Kind.KW_default_width, startPos, word.length())); isKW=true; break;
+									case "default_height": tokens.add(new Token(Kind.KW_default_height, startPos, word.length())); isKW=true; break;
+									case "show": tokens.add(new Token(Kind.KW_show, startPos, word.length())); isKW=true; break;
+									case "write": tokens.add(new Token(Kind.KW_write, startPos, word.length())); isKW=true; break;
+									case "to": tokens.add(new Token(Kind.KW_to, startPos, word.length())); isKW=true; break;
+									case "input": tokens.add(new Token(Kind.KW_input, startPos, word.length())); isKW=true; break;
+									case "from": tokens.add(new Token(Kind.KW_from, startPos, word.length())); isKW=true; break;
+									case "cart_x": tokens.add(new Token(Kind.KW_cart_x, startPos, word.length())); isKW=true; break;
+									case "cart_y": tokens.add(new Token(Kind.KW_cart_y, startPos, word.length())); isKW=true; break;
+									case "polar_a": tokens.add(new Token(Kind.KW_polar_a, startPos, word.length())); isKW=true; break;
+									case "polar_r": tokens.add(new Token(Kind.KW_polar_r, startPos, word.length())); isKW=true; break;
+									case "abs": tokens.add(new Token(Kind.KW_abs, startPos, word.length())); isKW=true; break;
+									case "sin": tokens.add(new Token(Kind.KW_sin, startPos, word.length())); isKW=true; break;
+									case "cos": tokens.add(new Token(Kind.KW_cos, startPos, word.length())); isKW=true; break;
+									case "atan": tokens.add(new Token(Kind.KW_atan, startPos, word.length())); isKW=true; break;
+									case "log": tokens.add(new Token(Kind.KW_log, startPos, word.length())); isKW=true; break;
+									case "image": tokens.add(new Token(Kind.KW_image, startPos, word.length())); isKW=true; break;
+									case "int": tokens.add(new Token(Kind.KW_int, startPos, word.length())); isKW=true; break;
+									case "float": tokens.add(new Token(Kind.KW_float, startPos, word.length())); isKW=true; break;
+									case "filename": tokens.add(new Token(Kind.KW_filename, startPos, word.length())); isKW=true; break;
+									case "boolean": tokens.add(new Token(Kind.KW_boolean, startPos, word.length())); isKW=true; break;
+									case "red": tokens.add(new Token(Kind.KW_red, startPos, word.length())); isKW=true; break;
+									case "blue": tokens.add(new Token(Kind.KW_blue, startPos, word.length())); isKW=true; break;
+									case "green": tokens.add(new Token(Kind.KW_green, startPos, word.length())); isKW=true; break;
+									case "alpha": tokens.add(new Token(Kind.KW_alpha, startPos, word.length())); isKW=true; break;
+									case "while": tokens.add(new Token(Kind.KW_while, startPos, word.length())); isKW=true; break;
+									case "width": tokens.add(new Token(Kind.KW_width, startPos, word.length())); isKW=true; break;
+									case "height": tokens.add(new Token(Kind.KW_height, startPos, word.length())); isKW=true; break;
 								}
-//								Extract the rest of the keyword if separated by a _
-//								if(chars[pos] == '_') {
-//									word += chars[pos];
-//									while(Character.isAlphabetic(chars[pos])) word += chars[pos++];
-//								}
-								//TODO Add implementation for Scanning Identifiers
-
+								// Check for Identifiers if the word is not a keyword
+								if (!isKW) {
+									while (Character.isAlphabetic(chars[pos]) ||
+											Character.isDigit(chars[pos]) ||
+											chars[pos] == '_' ||
+											chars[pos] == '$') word += chars[pos++];
+									tokens.add(new Token(Kind.IDENTIFIER, startPos, word.length()));
+								}
 							}
-//							TODO Remove this print
-//							System.out.println(ch);
-							else {
+							else
 								state = State.ERROR;
-							}
 						}
 					}
 				}
 				break;
-				case ERROR: {
+				case ERROR:
 					error(pos, line(pos), posInLine(pos), "illegal char. Error State");
-				}
 				break;
-				default: {
+				case END :
+				break;
+				default:
 					error(pos, 0, 0, "undefined state");
-				}
 			}
 		}
 		return this;
