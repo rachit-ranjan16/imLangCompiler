@@ -92,8 +92,6 @@ public class ScannerTest {
 		assertEquals(length, t.length);
 		return t;
 	}
-	
-
 
 	/**
 	 * Simple test case with an empty program.  The only Token will be the EOF Token.
@@ -137,8 +135,6 @@ public class ScannerTest {
 		checkNextIsEOF(scanner);
 	}
 	
-
-	
 	/**
 	 * This example shows how to test that your scanner is behaving when the
 	 * input is illegal.  In this case, we are giving it an illegal character '~' in position 2
@@ -167,9 +163,6 @@ public class ScannerTest {
 		}
 	}
 
-
-
-
 	@Test
 	public void testParens() throws LexicalException {
 		String input = "()";
@@ -180,9 +173,202 @@ public class ScannerTest {
 		checkNext(scanner, RPAREN, 1, 1, 1, 2);
 		checkNextIsEOF(scanner);
 	}
-	
 
-	
+	@Test
+	public void testAllBracketsBalanced() throws LexicalException {
+		String inp = "[{()}]";
+		Scanner scanner = new Scanner(inp).scan();
+		show(inp);
+		show(scanner);
+		checkNext(scanner, LSQUARE, 0, 1, 1,1);
+		checkNext(scanner, LBRACE, 1, 1, 1,2);
+		checkNext(scanner, LPAREN, 2, 1, 1,3);
+		checkNext(scanner, RPAREN, 3, 1, 1,4);
+		checkNext(scanner, RBRACE, 4, 1, 1,5);
+		checkNext(scanner, RSQUARE, 5, 1, 1,6);
+	}
+
+	@Test
+	public void testAllBracketsUnbalanced() throws LexicalException {
+		String inp = "]})\n({[";
+		Scanner scanner = new Scanner(inp).scan();
+		show(inp);
+		show(scanner);
+		checkNext(scanner, RSQUARE, 0, 1, 1,1);
+		checkNext(scanner, RBRACE, 1, 1, 1,2);
+		checkNext(scanner, RPAREN, 2, 1, 1,3);
+		checkNext(scanner, LPAREN, 4, 1, 2,1);
+		checkNext(scanner, LBRACE, 5, 1, 2,2);
+		checkNext(scanner, LSQUARE, 6, 1, 2,3);
+	}
+
+	@Test
+	public void testSeparators() throws LexicalException {
+		String inp = "{\n ;\n;\n[  ];\n(,) \n(.);\n}";
+		Scanner scanner = new Scanner(inp).scan();
+		show(inp);
+		show(scanner);
+		checkNext(scanner, LBRACE,0,1,1,1);
+		checkNext(scanner, SEMI,3,1,2,2);
+		checkNext(scanner, SEMI,5,1,3,1);
+		checkNext(scanner, LSQUARE,7,1,4,1);
+		checkNext(scanner, RSQUARE,10,1,4,4);
+		checkNext(scanner, SEMI,11,1,4,5);
+		checkNext(scanner, LPAREN,13,1,5,1);
+		checkNext(scanner, COMMA,14,1,5,2);
+		checkNext(scanner, RPAREN,15,1,5,3);
+		checkNext(scanner, LPAREN,18,1,6,1);
+		checkNext(scanner, DOT,19,1,6,2);
+		checkNext(scanner, RPAREN,20,1,6,3);
+		checkNext(scanner, SEMI,21,1,6,4);
+		checkNext(scanner, RBRACE,23,1,7,1);
+	}
+
+	@Test
+	public void testLTGTVariations() throws LexicalException {
+		String inp = "<<\n>=\n<";
+		Scanner scanner = new Scanner(inp).scan();
+		show(inp);
+		show(scanner);
+		checkNext(scanner, LPIXEL,0,2,1,1);
+		checkNext(scanner, OP_GE,3,2,2,1);
+		checkNext(scanner, OP_LT,6,1,3,1);
+	}
+
+	@Test
+	public void testMultiCharOperators() throws LexicalException {
+		String inp = "+-!!=::=***@";
+		Scanner scanner = new Scanner(inp).scan();
+		show(inp);
+		show(scanner);
+		checkNext(scanner, OP_PLUS,0,1,1,1);
+		checkNext(scanner, OP_MINUS,1,1,1,2);
+		checkNext(scanner, OP_EXCLAMATION,2,1,1,3);
+		checkNext(scanner, OP_NEQ,3,2,1,4);
+		checkNext(scanner, OP_COLON,5,1,1,6);
+		checkNext(scanner, OP_ASSIGN,6,2,1,7);
+		checkNext(scanner, OP_POWER,8,2,1,9);
+		checkNext(scanner, OP_TIMES,10,1,1,11);
+		checkNext(scanner, OP_AT,11,1,1,12);
+	}
+
+	@Test
+	public void testIllegalOperator() throws LexicalException {
+		String inp = ">=|=";
+		show(inp);
+		thrown.expect(LexicalException.class);  //Tell JUnit to expect a LexicalException
+		try {
+			show(new Scanner(inp).scan());
+		} catch (LexicalException e) {  //Catch the exception
+			show(e);                    //Display it
+			assertEquals(3,e.getPos()); //Check that it occurred in the expected position
+			throw e;                    //Rethrow exception so JUnit will see it
+		}
+	}
+
+	@Test
+	public void testValidComment() throws LexicalException {
+		String inp = ">/* Some Comment */<<";
+		Scanner scanner = new Scanner(inp).scan();
+		show(inp);
+		show(scanner);
+		checkNext(scanner, OP_GT,0,1,1,1);
+		checkNext(scanner, LPIXEL,19,2,1,20);
+	}
+
+
+	@Test
+	public void testBoolean() throws LexicalException {
+		String inp = "true!=false";
+		Scanner scanner = new Scanner(inp).scan();
+		show(inp);
+		show(scanner);
+		checkNext(scanner, BOOLEAN_LITERAL,0,4,1,1);
+		checkNext(scanner, OP_NEQ,4,2,1,5);
+		checkNext(scanner, BOOLEAN_LITERAL,6,5,1,7);
+	}
+
+	@Test
+	public void testIntegerExpression() throws LexicalException {
+		String inp = "32*23==23*32";
+		Scanner scanner = new Scanner(inp).scan();
+		show(inp);
+		show(scanner);
+		checkNext(scanner, INTEGER_LITERAL,0,2,1,1);
+		checkNext(scanner, OP_TIMES,2,1,1,3);
+		checkNext(scanner, INTEGER_LITERAL,3,2,1,4);
+		checkNext(scanner, OP_EQ,5,2,1,6);
+		checkNext(scanner, INTEGER_LITERAL,7,2,1,8);
+		checkNext(scanner, OP_TIMES,9,1,1,10);
+		checkNext(scanner, INTEGER_LITERAL,10,2,1,11);
+	}
+
+	@Test
+	public void testFloatingPointExpression() throws LexicalException {
+		String inp = "3.2*2.3==2.3*3.2";
+		Scanner scanner = new Scanner(inp).scan();
+		show(inp);
+		show(scanner);
+		checkNext(scanner, FLOAT_LITERAL,0,3,1,1);
+		checkNext(scanner, OP_TIMES,3,1,1,4);
+		checkNext(scanner, FLOAT_LITERAL,4,3,1,5);
+		checkNext(scanner, OP_EQ,7,2,1,8);
+		checkNext(scanner, FLOAT_LITERAL,9,3,1,10);
+		checkNext(scanner, OP_TIMES,12,1,1,13);
+		checkNext(scanner, FLOAT_LITERAL,13,3,1,14);
+		inp = ".23 + .345";
+		scanner = new Scanner(inp).scan();
+		show(inp);
+		show(scanner);
+		checkNext(scanner, FLOAT_LITERAL,0,3,1,1);
+		checkNext(scanner, OP_PLUS,4,1,1,5);
+		checkNext(scanner, FLOAT_LITERAL,6,4,1,7);
+
+	}
+
+	@Test
+	public void testKeyWords() throws LexicalException {
+		String inp = "default_width:=blue+cart_x**polar_a<<Z";
+		Scanner scanner = new Scanner(inp).scan();
+		show(inp);
+		show(scanner);
+		checkNext(scanner, KW_default_width,0,13,1,1);
+		checkNext(scanner, OP_ASSIGN,13,2,1,14);
+		checkNext(scanner, KW_blue,15,4,1,16);
+		checkNext(scanner, OP_PLUS,19,1,1,20);
+		checkNext(scanner, KW_cart_x,20,6,1,21);
+		checkNext(scanner, OP_POWER,26,2,1,27);
+		checkNext(scanner, KW_polar_a,28,7,1,29);
+		checkNext(scanner, LPIXEL,35,2,1,36);
+		checkNext(scanner, KW_Z,37,1,1,38);
+	}
+
+	@Test
+	public void testLineOfCode() throws LexicalException {
+		String inp = "default_width := blue_not$kw + cart_x ** pola2r_Bb <<  Z\n\talpha :=\tawesome ** sin .234 + atan 66";
+		Scanner scanner = new Scanner(inp).scan();
+		show(inp);
+		show(scanner);
+		checkNext(scanner, KW_default_width,0,13,1,1);
+		checkNext(scanner, OP_ASSIGN,14,2,1,15);
+		checkNext(scanner, IDENTIFIER,17,11,1,18);
+		checkNext(scanner, OP_PLUS,29,1,1,30);
+		checkNext(scanner, KW_cart_x,31,6,1,32);
+		checkNext(scanner, OP_POWER,38,2,1,39);
+		checkNext(scanner, IDENTIFIER,41,9,1,42);
+		checkNext(scanner, LPIXEL,51,2,1,52);
+		checkNext(scanner, KW_Z,55,1,1,56);
+		checkNext(scanner, KW_alpha,58,5,2,2);
+		checkNext(scanner, OP_ASSIGN,64,2,2,8);
+		checkNext(scanner, IDENTIFIER,67,7,2,11);
+		checkNext(scanner, OP_POWER,75,2,2,19);
+		checkNext(scanner, KW_sin,78,3,2,22);
+		checkNext(scanner, FLOAT_LITERAL,82,4,2,26);
+		checkNext(scanner, OP_PLUS,87,1,2,31);
+		checkNext(scanner, KW_atan,89,4,2,33);
+		checkNext(scanner, INTEGER_LITERAL,94,2,2,38);
+	}
+
 }
 	
 
