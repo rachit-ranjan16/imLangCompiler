@@ -256,13 +256,13 @@ public class ScannerTest {
 	public void testIllegalOperator() throws LexicalException {
 		String inp = ">=|=";
 		show(inp);
-		thrown.expect(LexicalException.class);  //Tell JUnit to expect a LexicalException
+		thrown.expect(LexicalException.class);
 		try {
 			show(new Scanner(inp).scan());
-		} catch (LexicalException e) {  //Catch the exception
-			show(e);                    //Display it
-			assertEquals(3,e.getPos()); //Check that it occurred in the expected position
-			throw e;                    //Rethrow exception so JUnit will see it
+		} catch (LexicalException e) {
+			show(e);
+			assertEquals(3,e.getPos());
+			throw e;
 		}
 	}
 
@@ -369,6 +369,19 @@ public class ScannerTest {
 		checkNext(scanner, INTEGER_LITERAL,94,2,2,38);
 	}
 
+	@Test
+	public void testInvalidIdentifier() throws LexicalException {
+		String inp = "apl~ha = 3 ** 4";
+		show(inp);
+		thrown.expect(LexicalException.class);
+		try {
+			show(new Scanner(inp).scan());
+		} catch (LexicalException e) {
+			show(e);
+			assertEquals(3,e.getPos());
+			throw e;
+		}
+	}
 }
 	
 
