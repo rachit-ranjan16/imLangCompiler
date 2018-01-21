@@ -272,26 +272,22 @@ public class Scanner {
 
 	Scanner(String inputString) {
 		int numChars = inputString.length();
-		this.chars = Arrays.copyOf(inputString.toCharArray(), numChars + 1); // input string terminated with null char
+		this.chars = Arrays.copyOf(inputString.toCharArray(), numChars + 1);
 		chars[numChars] = EOFChar;
 		tokens = new ArrayList<Token>();
 		lineStarts = initLineStarts();
 	}
 
+	 private enum State {START, ERROR};
 
 
-
-	 private enum State {START};  //TODO:  this is incomplete
-
-	 
-	 //TODO: Modify this to deal with the entire lexical specification
 	public Scanner scan() throws LexicalException {
 		int pos = 0;
 		State state = State.START;
 		int startPos = 0;
 		while (pos < chars.length) {
 			char ch = chars[pos];
-			switch(state) {
+			switch (state) {
 				case START: {
 					startPos = pos;
 					switch (ch) {
@@ -324,8 +320,20 @@ public class Scanner {
 						}
 						break;
 						case '.': {
-							tokens.add(new Token(Kind.DOT, startPos, pos - startPos + 1));
-							pos++;
+							if (Character.isDigit(chars[pos + 1])) {
+								String numLit = "";
+								numLit += chars[pos++];
+								//Extract Numbers till none are left
+								while (Character.isDigit(chars[pos])) {
+									numLit += chars[pos];
+									pos++;
+								}
+								tokens.add(new Token(Kind.FLOAT_LITERAL, startPos, numLit.length()));
+							}
+							else {
+								tokens.add(new Token(Kind.DOT, startPos, pos - startPos + 1));
+								pos++;
+							}
 						}
 						break;
 						case ')': {
@@ -405,8 +413,18 @@ public class Scanner {
 						}
 						break;
 						case '/': {
-							tokens.add(new Token(Kind.OP_DIV, startPos, pos - startPos + 1));
-							pos++;
+							//Handling / Operator
+							if (chars[pos + 1] != '*') {
+								tokens.add(new Token(Kind.OP_DIV, startPos, pos - startPos + 1));
+								pos++;
+							}
+							//Handling Comments
+							else {
+								pos++;
+								while (chars[pos] == '*') pos++;
+								if (chars[pos] != '/') state = State.ERROR;
+								else pos++;
+							}
 						}
 						break;
 						case '&': {
@@ -433,8 +451,7 @@ public class Scanner {
 							if (chars[pos + 1] == '=') {
 								tokens.add(new Token(Kind.OP_EQ, startPos, pos - startPos + 2));
 								pos += 2;
-							}
-							else {
+							} else {
 								error(pos, line(pos), posInLine(pos), "illegal char");
 							}
 						}
@@ -478,21 +495,114 @@ public class Scanner {
 							}
 						}
 						break;
-
-						default: {
-//							TODO Remove this print
-							System.out.println(ch);
-							error(pos, line(pos), posInLine(pos), "illegal char");
+						case 't': {
+							String check_bool = "";
+							for (int i = 0; i < 4; i++) {
+								check_bool += chars[pos + i];
+								System.out.println(check_bool);
+							}
+							if (check_bool.equals("true")) {
+								tokens.add(new Token(Kind.BOOLEAN_LITERAL, startPos, pos - startPos + 4));
+								pos += 4;
+							}
 						}
-					}//switch ch
+						break;
+						case 'f': {
+							String check_bool = "";
+							for (int i = 0; i < 5; i++) {
+								check_bool += chars[pos + i];
+								System.out.println(check_bool);
+							}
+							if (check_bool.equals("false")) {
+								tokens.add(new Token(Kind.BOOLEAN_LITERAL, startPos, pos - startPos + 5));
+								pos += 5;
+								System.out.println(pos + "  " + chars.length);
+							}
+
+						}
+						break;
+						default: {
+							//Check for Numeric Literals
+							if (Character.isDigit(ch)) {
+								String numLit = "";
+								//Extract Numbers till none are left
+								while (Character.isDigit(chars[pos])) numLit += chars[pos++];
+								//Check for Floating Point
+								if (chars[pos] == '.') {
+									numLit += chars[pos++];
+									//Extract Numbers till none are left
+									while (Character.isDigit(chars[pos])) numLit += chars[pos++];
+									tokens.add(new Token(Kind.FLOAT_LITERAL, startPos, numLit.length()));
+								}
+								else
+								tokens.add(new Token(Kind.INTEGER_LITERAL, startPos, numLit.length()));
+
+							}
+							//Check for Identifiers + Keywords
+							else if(Character.isAlphabetic(ch)) {
+								//Extract alphabets till none are left - this will only
+								String word = "";
+								while(Character.isAlphabetic(chars[pos])) {
+									word += chars[pos++];
+									if (chars[pos] == '_') word+= chars[pos++]; // || chars[pos] =='$')
+								}
+								switch(word) {
+									case "Z": tokens.add(new Token(Kind.KW_Z, startPos, word.length())); break;
+									case "default_width": tokens.add(new Token(Kind.KW_default_width, startPos, word.length())); break;
+									case "default_height": tokens.add(new Token(Kind.KW_default_height, startPos, word.length())); break;
+									case "show": tokens.add(new Token(Kind.KW_show, startPos, word.length())); break;
+									case "write": tokens.add(new Token(Kind.KW_write, startPos, word.length())); break;
+									case "to": tokens.add(new Token(Kind.KW_to, startPos, word.length())); break;
+									case "input": tokens.add(new Token(Kind.KW_input, startPos, word.length())); break;
+									case "from": tokens.add(new Token(Kind.KW_from, startPos, word.length())); break;
+									case "cart_x": tokens.add(new Token(Kind.KW_cart_x, startPos, word.length())); break;
+									case "cart_y": tokens.add(new Token(Kind.KW_cart_y, startPos, word.length())); break;
+									case "polar_a": tokens.add(new Token(Kind.KW_polar_a, startPos, word.length())); break;
+									case "polar_r": tokens.add(new Token(Kind.KW_polar_r, startPos, word.length())); break;
+									case "abs": tokens.add(new Token(Kind.KW_abs, startPos, word.length())); break;
+									case "sin": tokens.add(new Token(Kind.KW_sin, startPos, word.length())); break;
+									case "cos": tokens.add(new Token(Kind.KW_cos, startPos, word.length())); break;
+									case "atan": tokens.add(new Token(Kind.KW_atan, startPos, word.length())); break;
+									case "log": tokens.add(new Token(Kind.KW_log, startPos, word.length())); break;
+									case "image": tokens.add(new Token(Kind.KW_image, startPos, word.length())); break;
+									case "int": tokens.add(new Token(Kind.KW_int, startPos, word.length())); break;
+									case "float": tokens.add(new Token(Kind.KW_float, startPos, word.length())); break;
+									case "filename": tokens.add(new Token(Kind.KW_filename, startPos, word.length())); break;
+									case "boolean": tokens.add(new Token(Kind.KW_boolean, startPos, word.length())); break;
+									case "red": tokens.add(new Token(Kind.KW_red, startPos, word.length())); break;
+									case "blue": tokens.add(new Token(Kind.KW_blue, startPos, word.length())); break;
+									case "green": tokens.add(new Token(Kind.KW_green, startPos, word.length())); break;
+									case "alpha": tokens.add(new Token(Kind.KW_alpha, startPos, word.length())); break;
+									case "while": tokens.add(new Token(Kind.KW_while, startPos, word.length())); break;
+									case "width": tokens.add(new Token(Kind.KW_width, startPos, word.length())); break;
+									case "height": tokens.add(new Token(Kind.KW_height, startPos, word.length())); break;
+								}
+//								Extract the rest of the keyword if separated by a _
+//								if(chars[pos] == '_') {
+//									word += chars[pos];
+//									while(Character.isAlphabetic(chars[pos])) word += chars[pos++];
+//								}
+								//TODO Add implementation for Scanning Identifiers
+
+							}
+//							TODO Remove this print
+//							System.out.println(ch);
+							else {
+								state = State.ERROR;
+							}
+						}
+					}
+				}
+				break;
+				case ERROR: {
+					error(pos, line(pos), posInLine(pos), "illegal char. Error State");
 				}
 				break;
 				default: {
 					error(pos, 0, 0, "undefined state");
 				}
-			}// switch state
-		} // while
-			
+			}
+		}
 		return this;
 	}
 

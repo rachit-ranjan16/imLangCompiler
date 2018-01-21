@@ -254,16 +254,106 @@ public class ScannerTest {
 
 	@Test
 	public void testIllegalOperator() throws LexicalException {
-		String input = ">=|=";
-		show(input);
+		String inp = ">=|=";
+		show(inp);
 		thrown.expect(LexicalException.class);  //Tell JUnit to expect a LexicalException
 		try {
-			show(new Scanner(input).scan());
+			show(new Scanner(inp).scan());
 		} catch (LexicalException e) {  //Catch the exception
 			show(e);                    //Display it
 			assertEquals(3,e.getPos()); //Check that it occurred in the expected position
 			throw e;                    //Rethrow exception so JUnit will see it
 		}
+	}
+
+	@Test
+	public void testValidComment() throws LexicalException {
+		String inp = ">/***********/<<";
+		Scanner scanner = new Scanner(inp).scan();
+		show(inp);
+		show(scanner);
+		checkNext(scanner, OP_GT,0,1,1,1);
+		checkNext(scanner, LPIXEL,14,2,1,15);
+	}
+
+	@Test
+	public void testInvalidComment() throws LexicalException {
+		String inp = "<!=>/***Something*/*/";
+		show(inp);
+		thrown.expect(LexicalException.class);
+		try {
+			show(new Scanner(inp).scan());
+		} catch (LexicalException e) {
+			show(e);
+			assertEquals(8,e.getPos());
+			throw e;
+		}
+	}
+
+	@Test
+	public void testBoolean() throws LexicalException {
+		String inp = "true!=false";
+		Scanner scanner = new Scanner(inp).scan();
+		show(inp);
+		show(scanner);
+		checkNext(scanner, BOOLEAN_LITERAL,0,4,1,1);
+		checkNext(scanner, OP_NEQ,4,2,1,5);
+		checkNext(scanner, BOOLEAN_LITERAL,6,5,1,7);
+	}
+
+	@Test
+	public void testIntegerExpression() throws LexicalException {
+		String inp = "32*23==23*32";
+		Scanner scanner = new Scanner(inp).scan();
+		show(inp);
+		show(scanner);
+		checkNext(scanner, INTEGER_LITERAL,0,2,1,1);
+		checkNext(scanner, OP_TIMES,2,1,1,3);
+		checkNext(scanner, INTEGER_LITERAL,3,2,1,4);
+		checkNext(scanner, OP_EQ,5,2,1,6);
+		checkNext(scanner, INTEGER_LITERAL,7,2,1,8);
+		checkNext(scanner, OP_TIMES,9,1,1,10);
+		checkNext(scanner, INTEGER_LITERAL,10,2,1,11);
+	}
+
+	@Test
+	public void testFloatingPointExpression() throws LexicalException {
+		String inp = "3.2*2.3==2.3*3.2";
+		Scanner scanner = new Scanner(inp).scan();
+		show(inp);
+		show(scanner);
+		checkNext(scanner, FLOAT_LITERAL,0,3,1,1);
+		checkNext(scanner, OP_TIMES,3,1,1,4);
+		checkNext(scanner, FLOAT_LITERAL,4,3,1,5);
+		checkNext(scanner, OP_EQ,7,2,1,8);
+		checkNext(scanner, FLOAT_LITERAL,9,3,1,10);
+		checkNext(scanner, OP_TIMES,12,1,1,13);
+		checkNext(scanner, FLOAT_LITERAL,13,3,1,14);
+		inp = ".23+.345";
+		scanner = new Scanner(inp).scan();
+		show(inp);
+		show(scanner);
+		checkNext(scanner, FLOAT_LITERAL,0,3,1,1);
+		checkNext(scanner, OP_PLUS,3,1,1,4);
+		checkNext(scanner, FLOAT_LITERAL,4,4,1,5);
+
+	}
+
+	@Test
+	public void testKeyWords() throws LexicalException {
+		String inp = "default_width:=blue+cart_x**polar_a<<Z";
+		Scanner scanner = new Scanner(inp).scan();
+		show(inp);
+		show(scanner);
+		checkNext(scanner, KW_default_width,0,13,1,1);
+		checkNext(scanner, OP_ASSIGN,13,2,1,14);
+		checkNext(scanner, KW_blue,15,4,1,16);
+		checkNext(scanner, OP_PLUS,19,1,1,20);
+		checkNext(scanner, KW_cart_x,20,6,1,21);
+		checkNext(scanner, OP_POWER,26,2,1,27);
+		checkNext(scanner, KW_polar_a,28,7,1,29);
+		checkNext(scanner, LPIXEL,35,2,1,36);
+		checkNext(scanner, KW_Z,37,1,1,38);
 	}
 	
 }
