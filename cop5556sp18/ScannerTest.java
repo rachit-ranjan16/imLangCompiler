@@ -279,13 +279,14 @@ public class ScannerTest {
 
 	@Test
 	public void testBoolean() throws LexicalException {
-		String inp = "true!=false";
+		String inp = "true!=false.";
 		Scanner scanner = new Scanner(inp).scan();
 		show(inp);
 		show(scanner);
 		checkNext(scanner, BOOLEAN_LITERAL,0,4,1,1);
 		checkNext(scanner, OP_NEQ,4,2,1,5);
 		checkNext(scanner, BOOLEAN_LITERAL,6,5,1,7);
+		checkNext(scanner, DOT,11,1,1,12);
 	}
 
 	@Test
@@ -316,14 +317,15 @@ public class ScannerTest {
 		checkNext(scanner, FLOAT_LITERAL,9,3,1,10);
 		checkNext(scanner, OP_TIMES,12,1,1,13);
 		checkNext(scanner, FLOAT_LITERAL,13,3,1,14);
-		inp = ".23 + .345";
+		inp = ".23 + .345 + 0.11";
 		scanner = new Scanner(inp).scan();
 		show(inp);
 		show(scanner);
 		checkNext(scanner, FLOAT_LITERAL,0,3,1,1);
 		checkNext(scanner, OP_PLUS,4,1,1,5);
 		checkNext(scanner, FLOAT_LITERAL,6,4,1,7);
-
+		checkNext(scanner, OP_PLUS,11,1,1,12);
+		checkNext(scanner, FLOAT_LITERAL,13,4,1,14);
 	}
 
 	@Test
