@@ -276,7 +276,14 @@ public class ScannerTest {
 		checkNext(scanner, LPIXEL,19,2,1,20);
 	}
 
-
+	@Test
+	public void testNotSoStraightComment() throws LexicalException {
+		String inp = "/*Som/e *Com**ment*/.";
+		Scanner scanner = new Scanner(inp).scan();
+		show(inp);
+		show(scanner);
+		checkNext(scanner, DOT,20,1,1,21 );
+	}
 	@Test
 	public void testBoolean() throws LexicalException {
 		String inp = "true!=false.";
@@ -383,6 +390,18 @@ public class ScannerTest {
 			assertEquals(3,e.getPos());
 			throw e;
 		}
+	}
+
+	@Test
+	public void testFloatDotInteger() throws LexicalException {
+		String inp = "1.2.3..";
+		Scanner scanner = new Scanner(inp).scan();
+		show(inp);
+		show(scanner);
+		checkNext(scanner, FLOAT_LITERAL,0,3,1,1);
+		checkNext(scanner, FLOAT_LITERAL,3,2,1,4);
+		checkNext(scanner, DOT,5,1,1,6);
+		checkNext(scanner, DOT,6,1,1,7);
 	}
 }
 	

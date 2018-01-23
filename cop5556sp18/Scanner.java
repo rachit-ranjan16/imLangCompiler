@@ -422,9 +422,7 @@ public class Scanner {
 							//Handling Comments
 							else {
 								pos+=2;
-								char some_ch = chars[pos];
-								boolean check = chars[pos] != '*';
-								while (chars[pos] != '*') pos++;
+								while (commentEndDelimNotReached(pos)) pos++;
 								if (chars[pos + 1] != '/') state = State.ERROR;
 								else pos+=2;
 							}
@@ -597,7 +595,7 @@ public class Scanner {
 				}
 				break;
 				case ERROR:
-					error(pos, line(pos), posInLine(pos), "illegal char. Error State");
+					error(pos, line(pos), posInLine(pos), "illegal char" + chars[pos] + " Error State");
 				break;
 				case END :
 				break;
@@ -606,6 +604,10 @@ public class Scanner {
 			}
 		}
 		return this;
+	}
+
+	private boolean commentEndDelimNotReached(int pos) {
+		return !(("" + chars[pos] + chars[pos + 1]).equals("*/"));
 	}
 
 
