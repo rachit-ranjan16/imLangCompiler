@@ -535,8 +535,15 @@ public class Scanner {
 									while (Character.isDigit(chars[pos])) numLit += chars[pos++];
 									tokens.add(new Token(Kind.FLOAT_LITERAL, startPos, numLit.length()));
 								}
-								else
-								tokens.add(new Token(Kind.INTEGER_LITERAL, startPos, numLit.length()));
+								else {
+									try {
+										Integer.parseInt(numLit);
+										tokens.add(new Token(Kind.INTEGER_LITERAL, startPos, numLit.length()));
+									}
+									catch (NumberFormatException e) {
+										state = State.ERROR;
+									}
+								}
 
 							}
 							//Check for Identifiers + Keywords

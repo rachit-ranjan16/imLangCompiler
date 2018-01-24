@@ -312,6 +312,19 @@ public class ScannerTest {
 	}
 
 	@Test
+	public void testIntegerOffLimits() throws LexicalException {
+		String inp = "32.23+68719476736";
+		thrown.expect(LexicalException.class);
+		try {
+			show(new Scanner(inp).scan());
+		} catch (LexicalException e) {
+			show(e);
+			assertEquals(3,e.getPos());
+			throw e;
+		}
+	}
+
+	@Test
 	public void testFloatingPointExpression() throws LexicalException {
 		String inp = "3.2*2.3==2.3*3.2";
 		Scanner scanner = new Scanner(inp).scan();
