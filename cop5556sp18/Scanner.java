@@ -285,6 +285,7 @@ public class Scanner {
 		int pos = 0;
 		State state = State.START;
 		int startPos = 0;
+		String errMsg = "Ilegal char. Error State";
 		while (pos < chars.length) {
 			char ch = chars[pos];
 			switch (state) {
@@ -527,13 +528,25 @@ public class Scanner {
 							if (Character.isDigit(ch)) {
 								String numLit = "";
 								//Extract Numbers till none are left
+								while(pos + 1 < chars.length &&
+										chars[pos] == '0' &&
+										chars[pos + 1] != '.') {
+									tokens.add(new Token(Kind.INTEGER_LITERAL, startPos, 1));
+									pos++;
+									startPos++;
+								}
 								while (Character.isDigit(chars[pos])) numLit += chars[pos++];
 								//Check for Floating Point
 								if (chars[pos] == '.') {
 									numLit += chars[pos++];
 									//Extract Numbers till none are left
 									while (Character.isDigit(chars[pos])) numLit += chars[pos++];
+									if (Float.isFinite(Float.parseFloat(numLit)))
 									tokens.add(new Token(Kind.FLOAT_LITERAL, startPos, numLit.length()));
+									else {
+										errMsg = "Illegal Floating Point Literal";
+										state = State.ERROR;
+									}
 								}
 								else {
 									try {
@@ -541,6 +554,7 @@ public class Scanner {
 										tokens.add(new Token(Kind.INTEGER_LITERAL, startPos, numLit.length()));
 									}
 									catch (NumberFormatException e) {
+										errMsg = "Illegal Integer Literal";
 										state = State.ERROR;
 									}
 								}
@@ -602,7 +616,8 @@ public class Scanner {
 				}
 				break;
 				case ERROR:
-					error(pos, line(pos), posInLine(pos), "illegal char" + chars[pos] + " Error State");
+//					error(pos, line(pos), posInLine(pos), "illegal char" + chars[pos] + " Error State");
+					error(pos, line(pos), posInLine(pos), errMsg + chars[pos]);
 				break;
 				case END :
 				break;

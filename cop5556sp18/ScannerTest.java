@@ -319,11 +319,40 @@ public class ScannerTest {
 			show(new Scanner(inp).scan());
 		} catch (LexicalException e) {
 			show(e);
-			assertEquals(3,e.getPos());
+			assertEquals(17,e.getPos());
 			throw e;
 		}
 	}
 
+	@Test
+	public void testIntegerWithLeadingZeros() throws LexicalException {
+		String inp = "0043";
+		Scanner scanner = new Scanner(inp).scan();
+		show(inp);
+		show(scanner);
+		checkNext(scanner, INTEGER_LITERAL,0,1,1,1);
+		checkNext(scanner, INTEGER_LITERAL,1,1,1,2);
+		checkNext(scanner, INTEGER_LITERAL,2,2,1,3);
+	}
+
+	@Test
+	public void testFloatingPointWithLeadingZeros() throws LexicalException {
+		String inp = "00.43";
+		Scanner scanner = new Scanner(inp).scan();
+		show(inp);
+		show(scanner);
+		checkNext(scanner, INTEGER_LITERAL,0,1,1,1);
+		checkNext(scanner, FLOAT_LITERAL,1,4,1,2);
+	}
+
+	@Test
+	public void testFloatingPointWithNothingAfterDecimal() throws LexicalException {
+		String inp = "441.";
+		Scanner scanner = new Scanner(inp).scan();
+		show(inp);
+		show(scanner);
+		checkNext(scanner, FLOAT_LITERAL,0,4,1,1);
+	}
 	@Test
 	public void testFloatingPointExpression() throws LexicalException {
 		String inp = "3.2*2.3==2.3*3.2";
