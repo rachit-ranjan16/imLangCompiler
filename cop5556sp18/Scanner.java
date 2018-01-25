@@ -525,6 +525,7 @@ public class Scanner {
 						break;
 						default: {
 							//Check for Numeric Literals
+                            //Check for leading zeros
 							if (Character.isDigit(ch)) {
 								String numLit = "";
 								//Extract Numbers till none are left
@@ -563,11 +564,11 @@ public class Scanner {
 							//Check for Identifiers + Keywords
 							else if(Character.isAlphabetic(ch)) {
 								boolean isKW = false;
-								//Extract alphabets till none are left - this will only
+								//Extract alphabets till none are left - this will only catch keywords at best
 								String word = "";
 								while(Character.isAlphabetic(chars[pos])) {
 									word += chars[pos++];
-									if (chars[pos] == '_') word+= chars[pos++]; // || chars[pos] =='$')
+									if (chars[pos] == '_') word+= chars[pos++];
 								}
 								switch(word) {
 									case "Z": tokens.add(new Token(Kind.KW_Z, startPos, word.length())); isKW=true; break;
@@ -616,7 +617,6 @@ public class Scanner {
 				}
 				break;
 				case ERROR:
-//					error(pos, line(pos), posInLine(pos), "illegal char" + chars[pos] + " Error State");
 					error(pos, line(pos), posInLine(pos), errMsg + chars[pos]);
 				break;
 				case END :
@@ -629,6 +629,10 @@ public class Scanner {
 	}
 
 	private boolean commentEndDelimNotReached(int pos) {
+	    /**
+         * Returns true as long as characters at positions pos and pos+1 don't form the comment end delimiter
+         * @return
+         */
 		return !(("" + chars[pos] + chars[pos + 1]).equals("*/"));
 	}
 

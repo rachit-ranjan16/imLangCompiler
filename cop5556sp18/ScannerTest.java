@@ -337,12 +337,16 @@ public class ScannerTest {
 
 	@Test
 	public void testFloatingPointWithLeadingZeros() throws LexicalException {
-		String inp = "00.43";
+		String inp = "&00.43%|?";
 		Scanner scanner = new Scanner(inp).scan();
 		show(inp);
 		show(scanner);
-		checkNext(scanner, INTEGER_LITERAL,0,1,1,1);
-		checkNext(scanner, FLOAT_LITERAL,1,4,1,2);
+		checkNext(scanner, OP_AND,0,1,1,1);
+		checkNext(scanner, INTEGER_LITERAL,1,1,1,2);
+		checkNext(scanner, FLOAT_LITERAL,2,4,1,3);
+		checkNext(scanner, OP_MOD,6,1,1,7);
+		checkNext(scanner, OP_OR,7,1,1,8);
+		checkNext(scanner, OP_QUESTION,8,1,1,9);
 	}
 
 	@Test
