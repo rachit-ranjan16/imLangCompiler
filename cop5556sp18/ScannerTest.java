@@ -426,14 +426,24 @@ public class ScannerTest {
 
 	@Test
 	public void testInvalidIdentifier() throws LexicalException {
-		String inp = "apl~ha = 3 ** 4";
+		String inp = "a_pl~ha = 3 ** 4";
 		show(inp);
 		thrown.expect(LexicalException.class);
 		try {
 			show(new Scanner(inp).scan());
 		} catch (LexicalException e) {
 			show(e);
-			assertEquals(3,e.getPos());
+			assertEquals(4,e.getPos());
+			throw e;
+		}
+		inp = "$a_pl~ha = 3 ** 4";
+		show(inp);
+		thrown.expect(LexicalException.class);
+		try {
+			show(new Scanner(inp).scan());
+		} catch (LexicalException e) {
+			show(e);
+			assertEquals(0,e.getPos());
 			throw e;
 		}
 	}
