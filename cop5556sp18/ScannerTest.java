@@ -30,9 +30,10 @@ public class ScannerTest {
 	@Rule
 	public ExpectedException thrown = ExpectedException.none();
 
-	
+
 	//To make it easy to print objects and turn this output on and off
 	static boolean doPrint = true;
+
 	private void show(Object input) {
 		if (doPrint) {
 			System.out.println(input.toString());
@@ -40,13 +41,13 @@ public class ScannerTest {
 	}
 
 	/**
-	 *Retrieves the next token and checks that it is an EOF token. 
-	 *Also checks that this was the last token.
+	 * Retrieves the next token and checks that it is an EOF token.
+	 * Also checks that this was the last token.
 	 *
 	 * @param scanner
 	 * @return the Token that was retrieved
 	 */
-	
+
 	Token checkNextIsEOF(Scanner scanner) {
 		Scanner.Token token = scanner.nextToken();
 		assertEquals(Scanner.Kind.EOF, token.kind);
@@ -58,14 +59,14 @@ public class ScannerTest {
 	/**
 	 * Retrieves the next token and checks that its kind, position, length, line, and position in line
 	 * match the given parameters.
-	 * 
+	 *
 	 * @param scanner
 	 * @param kind
 	 * @param pos
 	 * @param length
 	 * @param line
 	 * @param pos_in_line
-	 * @return  the Token that was retrieved
+	 * @return the Token that was retrieved
 	 */
 	Token checkNext(Scanner scanner, Scanner.Kind kind, int pos, int length, int line, int pos_in_line) {
 		Token t = scanner.nextToken();
@@ -80,11 +81,11 @@ public class ScannerTest {
 	/**
 	 * Retrieves the next token and checks that its kind and length match the given
 	 * parameters.  The position, line, and position in line are ignored.
-	 * 
+	 *
 	 * @param scanner
 	 * @param kind
 	 * @param length
-	 * @return  the Token that was retrieved
+	 * @return the Token that was retrieved
 	 */
 	Token checkNext(Scanner scanner, Scanner.Kind kind, int length) {
 		Token t = scanner.nextToken();
@@ -95,7 +96,7 @@ public class ScannerTest {
 
 	/**
 	 * Simple test case with an empty program.  The only Token will be the EOF Token.
-	 *   
+	 *
 	 * @throws LexicalException
 	 */
 	@Test
@@ -106,20 +107,20 @@ public class ScannerTest {
 		show(scanner);   //Display the Scanner
 		checkNextIsEOF(scanner);  //Check that the only token is the EOF token.
 	}
-	
+
 	/**
 	 * Test illustrating how to put a new line in the input program and how to
 	 * check content of tokens.
-	 * 
+	 * <p>
 	 * Because we are using a Java String literal for input, we use \n for the
 	 * end of line character. (We should also be able to handle \n, \r, and \r\n
 	 * properly.)
-	 * 
-	 * Note that if we were reading the input from a file, the end of line 
+	 * <p>
+	 * Note that if we were reading the input from a file, the end of line
 	 * character would be inserted by the text editor.
-	 * Showing the input will let you check your input is 
+	 * Showing the input will let you check your input is
 	 * what you think it is.
-	 * 
+	 *
 	 * @throws LexicalException
 	 */
 	@Test
@@ -134,19 +135,19 @@ public class ScannerTest {
 		checkNext(scanner, SEMI, 4, 1, 2, 2);
 		checkNextIsEOF(scanner);
 	}
-	
+
 	/**
 	 * This example shows how to test that your scanner is behaving when the
 	 * input is illegal.  In this case, we are giving it an illegal character '~' in position 2
-	 * 
+	 * <p>
 	 * The example shows catching the exception that is thrown by the scanner,
 	 * looking at it, and checking its contents before rethrowing it.  If caught
-	 * but not rethrown, then JUnit won't get the exception and the test will fail.  
-	 * 
-	 * The test will work without putting the try-catch block around 
-	 * new Scanner(input).scan(); but then you won't be able to check 
+	 * but not rethrown, then JUnit won't get the exception and the test will fail.
+	 * <p>
+	 * The test will work without putting the try-catch block around
+	 * new Scanner(input).scan(); but then you won't be able to check
 	 * or display the thrown exception.
-	 * 
+	 *
 	 * @throws LexicalException
 	 */
 	@Test
@@ -158,7 +159,7 @@ public class ScannerTest {
 			new Scanner(input).scan();
 		} catch (LexicalException e) {  //Catch the exception
 			show(e);                    //Display it
-			assertEquals(2,e.getPos()); //Check that it occurred in the expected position
+			assertEquals(2, e.getPos()); //Check that it occurred in the expected position
 			throw e;                    //Rethrow exception so JUnit will see it
 		}
 	}
@@ -180,12 +181,12 @@ public class ScannerTest {
 		Scanner scanner = new Scanner(inp).scan();
 		show(inp);
 		show(scanner);
-		checkNext(scanner, LSQUARE, 0, 1, 1,1);
-		checkNext(scanner, LBRACE, 1, 1, 1,2);
-		checkNext(scanner, LPAREN, 2, 1, 1,3);
-		checkNext(scanner, RPAREN, 3, 1, 1,4);
-		checkNext(scanner, RBRACE, 4, 1, 1,5);
-		checkNext(scanner, RSQUARE, 5, 1, 1,6);
+		checkNext(scanner, LSQUARE, 0, 1, 1, 1);
+		checkNext(scanner, LBRACE, 1, 1, 1, 2);
+		checkNext(scanner, LPAREN, 2, 1, 1, 3);
+		checkNext(scanner, RPAREN, 3, 1, 1, 4);
+		checkNext(scanner, RBRACE, 4, 1, 1, 5);
+		checkNext(scanner, RSQUARE, 5, 1, 1, 6);
 	}
 
 	@Test
@@ -194,12 +195,12 @@ public class ScannerTest {
 		Scanner scanner = new Scanner(inp).scan();
 		show(inp);
 		show(scanner);
-		checkNext(scanner, RSQUARE, 0, 1, 1,1);
-		checkNext(scanner, RBRACE, 1, 1, 1,2);
-		checkNext(scanner, RPAREN, 2, 1, 1,3);
-		checkNext(scanner, LPAREN, 4, 1, 2,1);
-		checkNext(scanner, LBRACE, 5, 1, 2,2);
-		checkNext(scanner, LSQUARE, 6, 1, 2,3);
+		checkNext(scanner, RSQUARE, 0, 1, 1, 1);
+		checkNext(scanner, RBRACE, 1, 1, 1, 2);
+		checkNext(scanner, RPAREN, 2, 1, 1, 3);
+		checkNext(scanner, LPAREN, 4, 1, 2, 1);
+		checkNext(scanner, LBRACE, 5, 1, 2, 2);
+		checkNext(scanner, LSQUARE, 6, 1, 2, 3);
 	}
 
 	@Test
@@ -208,20 +209,20 @@ public class ScannerTest {
 		Scanner scanner = new Scanner(inp).scan();
 		show(inp);
 		show(scanner);
-		checkNext(scanner, LBRACE,0,1,1,1);
-		checkNext(scanner, SEMI,3,1,2,2);
-		checkNext(scanner, SEMI,5,1,3,1);
-		checkNext(scanner, LSQUARE,7,1,4,1);
-		checkNext(scanner, RSQUARE,10,1,4,4);
-		checkNext(scanner, SEMI,11,1,4,5);
-		checkNext(scanner, LPAREN,13,1,5,1);
-		checkNext(scanner, COMMA,14,1,5,2);
-		checkNext(scanner, RPAREN,15,1,5,3);
-		checkNext(scanner, LPAREN,18,1,6,1);
-		checkNext(scanner, DOT,19,1,6,2);
-		checkNext(scanner, RPAREN,20,1,6,3);
-		checkNext(scanner, SEMI,21,1,6,4);
-		checkNext(scanner, RBRACE,23,1,7,1);
+		checkNext(scanner, LBRACE, 0, 1, 1, 1);
+		checkNext(scanner, SEMI, 3, 1, 2, 2);
+		checkNext(scanner, SEMI, 5, 1, 3, 1);
+		checkNext(scanner, LSQUARE, 7, 1, 4, 1);
+		checkNext(scanner, RSQUARE, 10, 1, 4, 4);
+		checkNext(scanner, SEMI, 11, 1, 4, 5);
+		checkNext(scanner, LPAREN, 13, 1, 5, 1);
+		checkNext(scanner, COMMA, 14, 1, 5, 2);
+		checkNext(scanner, RPAREN, 15, 1, 5, 3);
+		checkNext(scanner, LPAREN, 18, 1, 6, 1);
+		checkNext(scanner, DOT, 19, 1, 6, 2);
+		checkNext(scanner, RPAREN, 20, 1, 6, 3);
+		checkNext(scanner, SEMI, 21, 1, 6, 4);
+		checkNext(scanner, RBRACE, 23, 1, 7, 1);
 	}
 
 	@Test
@@ -230,9 +231,9 @@ public class ScannerTest {
 		Scanner scanner = new Scanner(inp).scan();
 		show(inp);
 		show(scanner);
-		checkNext(scanner, LPIXEL,0,2,1,1);
-		checkNext(scanner, OP_GE,3,2,2,1);
-		checkNext(scanner, OP_LT,6,1,3,1);
+		checkNext(scanner, LPIXEL, 0, 2, 1, 1);
+		checkNext(scanner, OP_GE, 3, 2, 2, 1);
+		checkNext(scanner, OP_LT, 6, 1, 3, 1);
 	}
 
 	@Test
@@ -241,15 +242,15 @@ public class ScannerTest {
 		Scanner scanner = new Scanner(inp).scan();
 		show(inp);
 		show(scanner);
-		checkNext(scanner, OP_PLUS,0,1,1,1);
-		checkNext(scanner, OP_MINUS,1,1,1,2);
-		checkNext(scanner, OP_EXCLAMATION,2,1,1,3);
-		checkNext(scanner, OP_NEQ,3,2,1,4);
-		checkNext(scanner, OP_COLON,5,1,1,6);
-		checkNext(scanner, OP_ASSIGN,6,2,1,7);
-		checkNext(scanner, OP_POWER,8,2,1,9);
-		checkNext(scanner, OP_TIMES,10,1,1,11);
-		checkNext(scanner, OP_AT,11,1,1,12);
+		checkNext(scanner, OP_PLUS, 0, 1, 1, 1);
+		checkNext(scanner, OP_MINUS, 1, 1, 1, 2);
+		checkNext(scanner, OP_EXCLAMATION, 2, 1, 1, 3);
+		checkNext(scanner, OP_NEQ, 3, 2, 1, 4);
+		checkNext(scanner, OP_COLON, 5, 1, 1, 6);
+		checkNext(scanner, OP_ASSIGN, 6, 2, 1, 7);
+		checkNext(scanner, OP_POWER, 8, 2, 1, 9);
+		checkNext(scanner, OP_TIMES, 10, 1, 1, 11);
+		checkNext(scanner, OP_AT, 11, 1, 1, 12);
 	}
 
 	@Test
@@ -261,7 +262,7 @@ public class ScannerTest {
 			show(new Scanner(inp).scan());
 		} catch (LexicalException e) {
 			show(e);
-			assertEquals(3,e.getPos());
+			assertEquals(3, e.getPos());
 			throw e;
 		}
 	}
@@ -272,8 +273,8 @@ public class ScannerTest {
 		Scanner scanner = new Scanner(inp).scan();
 		show(inp);
 		show(scanner);
-		checkNext(scanner, OP_GT,0,1,1,1);
-		checkNext(scanner, LPIXEL,19,2,1,20);
+		checkNext(scanner, OP_GT, 0, 1, 1, 1);
+		checkNext(scanner, LPIXEL, 19, 2, 1, 20);
 	}
 
 	@Test
@@ -282,7 +283,20 @@ public class ScannerTest {
 		Scanner scanner = new Scanner(inp).scan();
 		show(inp);
 		show(scanner);
-		checkNext(scanner, DOT,21,1,2,10 );
+		checkNext(scanner, DOT, 21, 1, 2, 10);
+	}
+
+	@Test
+	public void testCommentStartWithoutEnd() throws LexicalException {
+		String inp = "/*";
+		thrown.expect(LexicalException.class);
+		try {
+			show(new Scanner(inp).scan());
+		} catch (LexicalException e) {
+			show(e);
+			assertEquals(2, e.getPos());
+			throw e;
+		}
 	}
 	@Test
 	public void testBoolean() throws LexicalException {
@@ -290,10 +304,10 @@ public class ScannerTest {
 		Scanner scanner = new Scanner(inp).scan();
 		show(inp);
 		show(scanner);
-		checkNext(scanner, BOOLEAN_LITERAL,0,4,1,1);
-		checkNext(scanner, OP_NEQ,4,2,1,5);
-		checkNext(scanner, BOOLEAN_LITERAL,6,5,1,7);
-		checkNext(scanner, DOT,11,1,1,12);
+		checkNext(scanner, BOOLEAN_LITERAL, 0, 4, 1, 1);
+		checkNext(scanner, OP_NEQ, 4, 2, 1, 5);
+		checkNext(scanner, BOOLEAN_LITERAL, 6, 5, 1, 7);
+		checkNext(scanner, DOT, 11, 1, 1, 12);
 	}
 
 	@Test
@@ -302,13 +316,13 @@ public class ScannerTest {
 		Scanner scanner = new Scanner(inp).scan();
 		show(inp);
 		show(scanner);
-		checkNext(scanner, INTEGER_LITERAL,0,2,1,1);
-		checkNext(scanner, OP_TIMES,2,1,1,3);
-		checkNext(scanner, INTEGER_LITERAL,3,2,1,4);
-		checkNext(scanner, OP_EQ,5,2,1,6);
-		checkNext(scanner, INTEGER_LITERAL,7,2,1,8);
-		checkNext(scanner, OP_TIMES,9,1,1,10);
-		checkNext(scanner, INTEGER_LITERAL,10,2,1,11);
+		checkNext(scanner, INTEGER_LITERAL, 0, 2, 1, 1);
+		checkNext(scanner, OP_TIMES, 2, 1, 1, 3);
+		checkNext(scanner, INTEGER_LITERAL, 3, 2, 1, 4);
+		checkNext(scanner, OP_EQ, 5, 2, 1, 6);
+		checkNext(scanner, INTEGER_LITERAL, 7, 2, 1, 8);
+		checkNext(scanner, OP_TIMES, 9, 1, 1, 10);
+		checkNext(scanner, INTEGER_LITERAL, 10, 2, 1, 11);
 	}
 
 	@Test
@@ -319,7 +333,7 @@ public class ScannerTest {
 			show(new Scanner(inp).scan());
 		} catch (LexicalException e) {
 			show(e);
-			assertEquals(17,e.getPos());
+			assertEquals(17, e.getPos());
 			throw e;
 		}
 	}
@@ -330,9 +344,9 @@ public class ScannerTest {
 		Scanner scanner = new Scanner(inp).scan();
 		show(inp);
 		show(scanner);
-		checkNext(scanner, INTEGER_LITERAL,0,1,1,1);
-		checkNext(scanner, INTEGER_LITERAL,1,1,1,2);
-		checkNext(scanner, INTEGER_LITERAL,2,2,1,3);
+		checkNext(scanner, INTEGER_LITERAL, 0, 1, 1, 1);
+		checkNext(scanner, INTEGER_LITERAL, 1, 1, 1, 2);
+		checkNext(scanner, INTEGER_LITERAL, 2, 2, 1, 3);
 	}
 
 	@Test
@@ -341,12 +355,12 @@ public class ScannerTest {
 		Scanner scanner = new Scanner(inp).scan();
 		show(inp);
 		show(scanner);
-		checkNext(scanner, OP_AND,0,1,1,1);
-		checkNext(scanner, INTEGER_LITERAL,1,1,1,2);
-		checkNext(scanner, FLOAT_LITERAL,2,4,1,3);
-		checkNext(scanner, OP_MOD,6,1,1,7);
-		checkNext(scanner, OP_OR,7,1,1,8);
-		checkNext(scanner, OP_QUESTION,8,1,1,9);
+		checkNext(scanner, OP_AND, 0, 1, 1, 1);
+		checkNext(scanner, INTEGER_LITERAL, 1, 1, 1, 2);
+		checkNext(scanner, FLOAT_LITERAL, 2, 4, 1, 3);
+		checkNext(scanner, OP_MOD, 6, 1, 1, 7);
+		checkNext(scanner, OP_OR, 7, 1, 1, 8);
+		checkNext(scanner, OP_QUESTION, 8, 1, 1, 9);
 	}
 
 	@Test
@@ -355,30 +369,44 @@ public class ScannerTest {
 		Scanner scanner = new Scanner(inp).scan();
 		show(inp);
 		show(scanner);
-		checkNext(scanner, FLOAT_LITERAL,0,4,1,1);
+		checkNext(scanner, FLOAT_LITERAL, 0, 4, 1, 1);
 	}
+
 	@Test
 	public void testFloatingPointExpression() throws LexicalException {
 		String inp = "3.2*2.3==2.3*3.2";
 		Scanner scanner = new Scanner(inp).scan();
 		show(inp);
 		show(scanner);
-		checkNext(scanner, FLOAT_LITERAL,0,3,1,1);
-		checkNext(scanner, OP_TIMES,3,1,1,4);
-		checkNext(scanner, FLOAT_LITERAL,4,3,1,5);
-		checkNext(scanner, OP_EQ,7,2,1,8);
-		checkNext(scanner, FLOAT_LITERAL,9,3,1,10);
-		checkNext(scanner, OP_TIMES,12,1,1,13);
-		checkNext(scanner, FLOAT_LITERAL,13,3,1,14);
+		checkNext(scanner, FLOAT_LITERAL, 0, 3, 1, 1);
+		checkNext(scanner, OP_TIMES, 3, 1, 1, 4);
+		checkNext(scanner, FLOAT_LITERAL, 4, 3, 1, 5);
+		checkNext(scanner, OP_EQ, 7, 2, 1, 8);
+		checkNext(scanner, FLOAT_LITERAL, 9, 3, 1, 10);
+		checkNext(scanner, OP_TIMES, 12, 1, 1, 13);
+		checkNext(scanner, FLOAT_LITERAL, 13, 3, 1, 14);
 		inp = ".23 + .345 + 0.11";
 		scanner = new Scanner(inp).scan();
 		show(inp);
 		show(scanner);
-		checkNext(scanner, FLOAT_LITERAL,0,3,1,1);
-		checkNext(scanner, OP_PLUS,4,1,1,5);
-		checkNext(scanner, FLOAT_LITERAL,6,4,1,7);
-		checkNext(scanner, OP_PLUS,11,1,1,12);
-		checkNext(scanner, FLOAT_LITERAL,13,4,1,14);
+		checkNext(scanner, FLOAT_LITERAL, 0, 3, 1, 1);
+		checkNext(scanner, OP_PLUS, 4, 1, 1, 5);
+		checkNext(scanner, FLOAT_LITERAL, 6, 4, 1, 7);
+		checkNext(scanner, OP_PLUS, 11, 1, 1, 12);
+		checkNext(scanner, FLOAT_LITERAL, 13, 4, 1, 14);
+	}
+
+	@Test
+	public void testFloatOutOfRange() throws LexicalException {
+		String input = "990000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000.9999";
+		thrown.expect(LexicalException.class);
+		try {
+			new Scanner(input).scan();
+		} catch (LexicalException e) {
+			show(e);
+			assertEquals(902, e.getPos());
+			throw e;
+		}
 	}
 
 	@Test
@@ -387,15 +415,15 @@ public class ScannerTest {
 		Scanner scanner = new Scanner(inp).scan();
 		show(inp);
 		show(scanner);
-		checkNext(scanner, KW_default_width,0,13,1,1);
-		checkNext(scanner, OP_ASSIGN,13,2,1,14);
-		checkNext(scanner, KW_blue,15,4,1,16);
-		checkNext(scanner, OP_PLUS,19,1,1,20);
-		checkNext(scanner, KW_cart_x,20,6,1,21);
-		checkNext(scanner, OP_POWER,26,2,1,27);
-		checkNext(scanner, KW_polar_a,28,7,1,29);
-		checkNext(scanner, LPIXEL,35,2,1,36);
-		checkNext(scanner, KW_Z,37,1,1,38);
+		checkNext(scanner, KW_default_width, 0, 13, 1, 1);
+		checkNext(scanner, OP_ASSIGN, 13, 2, 1, 14);
+		checkNext(scanner, KW_blue, 15, 4, 1, 16);
+		checkNext(scanner, OP_PLUS, 19, 1, 1, 20);
+		checkNext(scanner, KW_cart_x, 20, 6, 1, 21);
+		checkNext(scanner, OP_POWER, 26, 2, 1, 27);
+		checkNext(scanner, KW_polar_a, 28, 7, 1, 29);
+		checkNext(scanner, LPIXEL, 35, 2, 1, 36);
+		checkNext(scanner, KW_Z, 37, 1, 1, 38);
 	}
 
 	@Test
@@ -404,24 +432,24 @@ public class ScannerTest {
 		Scanner scanner = new Scanner(inp).scan();
 		show(inp);
 		show(scanner);
-		checkNext(scanner, KW_default_width,0,13,1,1);
-		checkNext(scanner, OP_ASSIGN,14,2,1,15);
-		checkNext(scanner, IDENTIFIER,17,11,1,18);
-		checkNext(scanner, OP_PLUS,29,1,1,30);
-		checkNext(scanner, KW_cart_x,31,6,1,32);
-		checkNext(scanner, OP_POWER,38,2,1,39);
-		checkNext(scanner, IDENTIFIER,41,9,1,42);
-		checkNext(scanner, LPIXEL,51,2,1,52);
-		checkNext(scanner, KW_Z,55,1,1,56);
-		checkNext(scanner, KW_alpha,58,5,2,2);
-		checkNext(scanner, OP_ASSIGN,64,2,2,8);
-		checkNext(scanner, IDENTIFIER,67,7,2,11);
-		checkNext(scanner, OP_POWER,75,2,2,19);
-		checkNext(scanner, KW_sin,78,3,2,22);
-		checkNext(scanner, FLOAT_LITERAL,82,4,2,26);
-		checkNext(scanner, OP_PLUS,87,1,2,31);
-		checkNext(scanner, KW_atan,89,4,2,33);
-		checkNext(scanner, INTEGER_LITERAL,94,2,2,38);
+		checkNext(scanner, KW_default_width, 0, 13, 1, 1);
+		checkNext(scanner, OP_ASSIGN, 14, 2, 1, 15);
+		checkNext(scanner, IDENTIFIER, 17, 11, 1, 18);
+		checkNext(scanner, OP_PLUS, 29, 1, 1, 30);
+		checkNext(scanner, KW_cart_x, 31, 6, 1, 32);
+		checkNext(scanner, OP_POWER, 38, 2, 1, 39);
+		checkNext(scanner, IDENTIFIER, 41, 9, 1, 42);
+		checkNext(scanner, LPIXEL, 51, 2, 1, 52);
+		checkNext(scanner, KW_Z, 55, 1, 1, 56);
+		checkNext(scanner, KW_alpha, 58, 5, 2, 2);
+		checkNext(scanner, OP_ASSIGN, 64, 2, 2, 8);
+		checkNext(scanner, IDENTIFIER, 67, 7, 2, 11);
+		checkNext(scanner, OP_POWER, 75, 2, 2, 19);
+		checkNext(scanner, KW_sin, 78, 3, 2, 22);
+		checkNext(scanner, FLOAT_LITERAL, 82, 4, 2, 26);
+		checkNext(scanner, OP_PLUS, 87, 1, 2, 31);
+		checkNext(scanner, KW_atan, 89, 4, 2, 33);
+		checkNext(scanner, INTEGER_LITERAL, 94, 2, 2, 38);
 	}
 
 	@Test
@@ -433,7 +461,7 @@ public class ScannerTest {
 			show(new Scanner(inp).scan());
 		} catch (LexicalException e) {
 			show(e);
-			assertEquals(4,e.getPos());
+			assertEquals(4, e.getPos());
 			throw e;
 		}
 		inp = "$a_pl~ha = 3 ** 4";
@@ -443,7 +471,7 @@ public class ScannerTest {
 			show(new Scanner(inp).scan());
 		} catch (LexicalException e) {
 			show(e);
-			assertEquals(0,e.getPos());
+			assertEquals(0, e.getPos());
 			throw e;
 		}
 	}
@@ -454,11 +482,12 @@ public class ScannerTest {
 		Scanner scanner = new Scanner(inp).scan();
 		show(inp);
 		show(scanner);
-		checkNext(scanner, FLOAT_LITERAL,0,3,1,1);
-		checkNext(scanner, FLOAT_LITERAL,3,2,1,4);
-		checkNext(scanner, DOT,5,1,1,6);
-		checkNext(scanner, DOT,6,1,1,7);
+		checkNext(scanner, FLOAT_LITERAL, 0, 3, 1, 1);
+		checkNext(scanner, FLOAT_LITERAL, 3, 2, 1, 4);
+		checkNext(scanner, DOT, 5, 1, 1, 6);
+		checkNext(scanner, DOT, 6, 1, 1, 7);
 	}
 }
+
 	
 
