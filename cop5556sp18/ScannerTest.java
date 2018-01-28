@@ -278,11 +278,11 @@ public class ScannerTest {
 
 	@Test
 	public void testNotSoStraightComment() throws LexicalException {
-		String inp = "/*Som/e *Com**ment*/.";
+		String inp = "/*Som/e *Co\nm**ment*/.";
 		Scanner scanner = new Scanner(inp).scan();
 		show(inp);
 		show(scanner);
-		checkNext(scanner, DOT,20,1,1,21 );
+		checkNext(scanner, DOT,21,1,2,10 );
 	}
 	@Test
 	public void testBoolean() throws LexicalException {
