@@ -423,9 +423,12 @@ public class Scanner {
 							//Handling Comments
 							else {
 								pos+=2;
-								while (commentEndDelimNotReached(pos)) pos++;
-								if (chars[pos + 1] != '/') state = State.ERROR;
-								else pos+=2;
+								if (isPointerAtOrBeyondEOF(pos)) state = State.ERROR;
+								else {
+									while (pos < chars.length - 1 && commentEndDelimNotReached(pos)) pos++;
+									if (isPointerAtOrBeyondEOF(pos) || chars[pos + 1] != '/') state = State.ERROR;
+									else pos += 2;
+								}
 							}
 						}
 						break;
@@ -536,6 +539,7 @@ public class Scanner {
 									pos++;
 									startPos++;
 								}
+								if (pos == chars.length - 1) break;
 								while (Character.isDigit(chars[pos])) numLit += chars[pos++];
 								//Check for Floating Point
 								if (chars[pos] == '.') {
@@ -626,6 +630,14 @@ public class Scanner {
 			}
 		}
 		return this;
+	}
+
+	private boolean isPointerAtOrBeyondEOF(int pos) {
+		/**
+		 * Returns True if Position Pointer is at EOF or beyond in the Input Character Array
+		 * @return
+		 */
+		return pos >= chars.length - 1;
 	}
 
 	private boolean commentEndDelimNotReached(int pos) {
