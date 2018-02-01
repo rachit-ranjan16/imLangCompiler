@@ -500,59 +500,6 @@ public class Scanner {
 							}
 						}
 						break;
-						case 't': {
-								String check_str = "";
-								int i = pos;
-								while(Character.isAlphabetic(chars[i]) ||
-										chars[i] == '$' ||
-										chars[i] == '_') {
-									check_str += chars[i++];
-								}
-								if (check_str.equals("true")) {
-									tokens.add(new Token(Kind.BOOLEAN_LITERAL, startPos, pos - startPos + 4));
-									pos += 4;
-								}
-								else if(check_str.equals("to")) {
-									tokens.add(new Token(Kind.KW_to, startPos, pos - startPos + 2));
-									pos += 2;
-								}
-								else {
-									tokens.add(new Token(Kind.IDENTIFIER, startPos, pos - startPos + check_str.length()));
-									pos += check_str.length();
-								}
-						}
-						break;
-						case 'f': {
-							String check_str = "";
-							int i = pos;
-							while(Character.isAlphabetic(chars[i]) ||
-									chars[i] == '$' ||
-									chars[i] == '_') {
-								check_str += chars[i++];
-							}
-							if (check_str.equals("false")) {
-								tokens.add(new Token(Kind.BOOLEAN_LITERAL, startPos, pos - startPos + 5));
-								pos += 5;
-							}
-							else if(check_str.equals("from")) {
-								tokens.add(new Token(Kind.KW_from, startPos, pos - startPos + 4));
-								pos += 4;
-							}
-							else if(check_str.equals("filename")) {
-								tokens.add(new Token(Kind.KW_filename, startPos, pos - startPos + 8));
-								pos += 8;
-							}
-							else if(check_str.equals("float")) {
-								tokens.add(new Token(Kind.KW_float, startPos, pos - startPos + 5));
-								pos += 5;
-							}
-							else {
-								tokens.add(new Token(Kind.IDENTIFIER, startPos, pos - startPos + check_str.length()));
-								pos += check_str.length();
-							}
-
-						}
-						break;
 						default: {
 							//Check for Numeric Literals
                             //Check for leading zeros
@@ -596,7 +543,7 @@ public class Scanner {
 							}
 							//Check for Identifiers + Keywords
 							else if(Character.isAlphabetic(ch)) {
-								boolean isKW = false;
+								boolean isKwOrBoolLit = false;
 								//Extract alphabets till none are left - this will only catch keywords at best
 								String word = "";
 								while(Character.isAlphabetic(chars[pos])) {
@@ -604,35 +551,41 @@ public class Scanner {
 									if (chars[pos] == '_' || chars[pos] =='$') word+= chars[pos++];
 								}
 								switch(word) {
-									case "Z": tokens.add(new Token(Kind.KW_Z, startPos, word.length())); isKW=true; break;
-									case "default_width": tokens.add(new Token(Kind.KW_default_width, startPos, word.length())); isKW=true; break;
-									case "default_height": tokens.add(new Token(Kind.KW_default_height, startPos, word.length())); isKW=true; break;
-									case "show": tokens.add(new Token(Kind.KW_show, startPos, word.length())); isKW=true; break;
-									case "write": tokens.add(new Token(Kind.KW_write, startPos, word.length())); isKW=true; break;
-									case "input": tokens.add(new Token(Kind.KW_input, startPos, word.length())); isKW=true; break;
-									case "cart_x": tokens.add(new Token(Kind.KW_cart_x, startPos, word.length())); isKW=true; break;
-									case "cart_y": tokens.add(new Token(Kind.KW_cart_y, startPos, word.length())); isKW=true; break;
-									case "polar_a": tokens.add(new Token(Kind.KW_polar_a, startPos, word.length())); isKW=true; break;
-									case "polar_r": tokens.add(new Token(Kind.KW_polar_r, startPos, word.length())); isKW=true; break;
-									case "abs": tokens.add(new Token(Kind.KW_abs, startPos, word.length())); isKW=true; break;
-									case "sin": tokens.add(new Token(Kind.KW_sin, startPos, word.length())); isKW=true; break;
-									case "cos": tokens.add(new Token(Kind.KW_cos, startPos, word.length())); isKW=true; break;
-									case "atan": tokens.add(new Token(Kind.KW_atan, startPos, word.length())); isKW=true; break;
-									case "log": tokens.add(new Token(Kind.KW_log, startPos, word.length())); isKW=true; break;
-									case "image": tokens.add(new Token(Kind.KW_image, startPos, word.length())); isKW=true; break;
-									case "int": tokens.add(new Token(Kind.KW_int, startPos, word.length())); isKW=true; break;
-									case "if": tokens.add(new Token(Kind.KW_if, startPos, word.length())); isKW=true; break;
-									case "boolean": tokens.add(new Token(Kind.KW_boolean, startPos, word.length())); isKW=true; break;
-									case "red": tokens.add(new Token(Kind.KW_red, startPos, word.length())); isKW=true; break;
-									case "blue": tokens.add(new Token(Kind.KW_blue, startPos, word.length())); isKW=true; break;
-									case "green": tokens.add(new Token(Kind.KW_green, startPos, word.length())); isKW=true; break;
-									case "alpha": tokens.add(new Token(Kind.KW_alpha, startPos, word.length())); isKW=true; break;
-									case "while": tokens.add(new Token(Kind.KW_while, startPos, word.length())); isKW=true; break;
-									case "width": tokens.add(new Token(Kind.KW_width, startPos, word.length())); isKW=true; break;
-									case "height": tokens.add(new Token(Kind.KW_height, startPos, word.length())); isKW=true; break;
+									case "Z": tokens.add(new Token(Kind.KW_Z, startPos, word.length())); isKwOrBoolLit=true; break;
+									case "default_width": tokens.add(new Token(Kind.KW_default_width, startPos, word.length())); isKwOrBoolLit=true; break;
+									case "default_height": tokens.add(new Token(Kind.KW_default_height, startPos, word.length())); isKwOrBoolLit=true; break;
+									case "show": tokens.add(new Token(Kind.KW_show, startPos, word.length())); isKwOrBoolLit=true; break;
+									case "write": tokens.add(new Token(Kind.KW_write, startPos, word.length())); isKwOrBoolLit=true; break;
+									case "input": tokens.add(new Token(Kind.KW_input, startPos, word.length())); isKwOrBoolLit=true; break;
+									case "cart_x": tokens.add(new Token(Kind.KW_cart_x, startPos, word.length())); isKwOrBoolLit=true; break;
+									case "cart_y": tokens.add(new Token(Kind.KW_cart_y, startPos, word.length())); isKwOrBoolLit=true; break;
+									case "polar_a": tokens.add(new Token(Kind.KW_polar_a, startPos, word.length())); isKwOrBoolLit=true; break;
+									case "polar_r": tokens.add(new Token(Kind.KW_polar_r, startPos, word.length())); isKwOrBoolLit=true; break;
+									case "abs": tokens.add(new Token(Kind.KW_abs, startPos, word.length())); isKwOrBoolLit=true; break;
+									case "sin": tokens.add(new Token(Kind.KW_sin, startPos, word.length())); isKwOrBoolLit=true; break;
+									case "cos": tokens.add(new Token(Kind.KW_cos, startPos, word.length())); isKwOrBoolLit=true; break;
+									case "atan": tokens.add(new Token(Kind.KW_atan, startPos, word.length())); isKwOrBoolLit=true; break;
+									case "log": tokens.add(new Token(Kind.KW_log, startPos, word.length())); isKwOrBoolLit=true; break;
+									case "image": tokens.add(new Token(Kind.KW_image, startPos, word.length())); isKwOrBoolLit=true; break;
+									case "int": tokens.add(new Token(Kind.KW_int, startPos, word.length())); isKwOrBoolLit=true; break;
+									case "if": tokens.add(new Token(Kind.KW_if, startPos, word.length())); isKwOrBoolLit=true; break;
+									case "boolean": tokens.add(new Token(Kind.KW_boolean, startPos, word.length())); isKwOrBoolLit=true; break;
+									case "red": tokens.add(new Token(Kind.KW_red, startPos, word.length())); isKwOrBoolLit=true; break;
+									case "blue": tokens.add(new Token(Kind.KW_blue, startPos, word.length())); isKwOrBoolLit=true; break;
+									case "green": tokens.add(new Token(Kind.KW_green, startPos, word.length())); isKwOrBoolLit=true; break;
+									case "alpha": tokens.add(new Token(Kind.KW_alpha, startPos, word.length())); isKwOrBoolLit=true; break;
+									case "while": tokens.add(new Token(Kind.KW_while, startPos, word.length())); isKwOrBoolLit=true; break;
+									case "width": tokens.add(new Token(Kind.KW_width, startPos, word.length())); isKwOrBoolLit=true; break;
+									case "height": tokens.add(new Token(Kind.KW_height, startPos, word.length())); isKwOrBoolLit=true; break;
+									case "from": tokens.add(new Token(Kind.KW_from, startPos, word.length())); isKwOrBoolLit=true; break;
+									case "to": tokens.add(new Token(Kind.KW_to, startPos, word.length())); isKwOrBoolLit=true; break;
+									case "filename": tokens.add(new Token(Kind.KW_filename, startPos, word.length())); isKwOrBoolLit=true; break;
+									case "float": tokens.add(new Token(Kind.KW_float, startPos, word.length())); isKwOrBoolLit=true; break;
+									case "true": tokens.add(new Token(Kind.BOOLEAN_LITERAL, startPos, word.length())); isKwOrBoolLit=true; break;
+									case "false": tokens.add(new Token(Kind.BOOLEAN_LITERAL, startPos, word.length())); isKwOrBoolLit=true; break;
 								}
-								// Check for Identifiers if the word is not a keyword
-								if (!isKW) {
+								// Check for Identifiers if the word is not a keyword or a boolean literal
+								if (!isKwOrBoolLit) {
 									while (Character.isAlphabetic(chars[pos]) ||
 											Character.isDigit(chars[pos]) ||
 											chars[pos] == '_' ||
