@@ -501,27 +501,54 @@ public class Scanner {
 						}
 						break;
 						case 't': {
-							String check_bool = "";
-							for (int i = 0; i < 4; i++) {
-								check_bool += chars[pos + i];
-								System.out.println(check_bool);
-							}
-							if (check_bool.equals("true")) {
-								tokens.add(new Token(Kind.BOOLEAN_LITERAL, startPos, pos - startPos + 4));
-								pos += 4;
-							}
+								String check_str = "";
+								int i = pos;
+								while(Character.isAlphabetic(chars[i]) ||
+										chars[i] == '$' ||
+										chars[i] == '_') {
+									check_str += chars[i++];
+								}
+								if (check_str.equals("true")) {
+									tokens.add(new Token(Kind.BOOLEAN_LITERAL, startPos, pos - startPos + 4));
+									pos += 4;
+								}
+								else if(check_str.equals("to")) {
+									tokens.add(new Token(Kind.KW_to, startPos, pos - startPos + 2));
+									pos += 2;
+								}
+								else {
+									tokens.add(new Token(Kind.IDENTIFIER, startPos, pos - startPos + check_str.length()));
+									pos += check_str.length();
+								}
 						}
 						break;
 						case 'f': {
-							String check_bool = "";
-							for (int i = 0; i < 5; i++) {
-								check_bool += chars[pos + i];
-								System.out.println(check_bool);
+							String check_str = "";
+							int i = pos;
+							while(Character.isAlphabetic(chars[i]) ||
+									chars[i] == '$' ||
+									chars[i] == '_') {
+								check_str += chars[i++];
 							}
-							if (check_bool.equals("false")) {
+							if (check_str.equals("false")) {
 								tokens.add(new Token(Kind.BOOLEAN_LITERAL, startPos, pos - startPos + 5));
 								pos += 5;
-								System.out.println(pos + "  " + chars.length);
+							}
+							else if(check_str.equals("from")) {
+								tokens.add(new Token(Kind.KW_from, startPos, pos - startPos + 4));
+								pos += 4;
+							}
+							else if(check_str.equals("filename")) {
+								tokens.add(new Token(Kind.KW_filename, startPos, pos - startPos + 8));
+								pos += 8;
+							}
+							else if(check_str.equals("float")) {
+								tokens.add(new Token(Kind.KW_float, startPos, pos - startPos + 5));
+								pos += 5;
+							}
+							else {
+								tokens.add(new Token(Kind.IDENTIFIER, startPos, pos - startPos + check_str.length()));
+								pos += check_str.length();
 							}
 
 						}
@@ -555,8 +582,10 @@ public class Scanner {
 								}
 								else {
 									try {
-										Integer.parseInt(numLit);
-										tokens.add(new Token(Kind.INTEGER_LITERAL, startPos, numLit.length()));
+										if (numLit.length()>0) {
+											Integer.parseInt(numLit);
+											tokens.add(new Token(Kind.INTEGER_LITERAL, startPos, numLit.length()));
+										}
 									}
 									catch (NumberFormatException e) {
 										errMsg = "Illegal Integer Literal";
@@ -572,7 +601,7 @@ public class Scanner {
 								String word = "";
 								while(Character.isAlphabetic(chars[pos])) {
 									word += chars[pos++];
-									if (chars[pos] == '_') word+= chars[pos++];
+									if (chars[pos] == '_' || chars[pos] =='$') word+= chars[pos++];
 								}
 								switch(word) {
 									case "Z": tokens.add(new Token(Kind.KW_Z, startPos, word.length())); isKW=true; break;
@@ -580,9 +609,7 @@ public class Scanner {
 									case "default_height": tokens.add(new Token(Kind.KW_default_height, startPos, word.length())); isKW=true; break;
 									case "show": tokens.add(new Token(Kind.KW_show, startPos, word.length())); isKW=true; break;
 									case "write": tokens.add(new Token(Kind.KW_write, startPos, word.length())); isKW=true; break;
-									case "to": tokens.add(new Token(Kind.KW_to, startPos, word.length())); isKW=true; break;
 									case "input": tokens.add(new Token(Kind.KW_input, startPos, word.length())); isKW=true; break;
-									case "from": tokens.add(new Token(Kind.KW_from, startPos, word.length())); isKW=true; break;
 									case "cart_x": tokens.add(new Token(Kind.KW_cart_x, startPos, word.length())); isKW=true; break;
 									case "cart_y": tokens.add(new Token(Kind.KW_cart_y, startPos, word.length())); isKW=true; break;
 									case "polar_a": tokens.add(new Token(Kind.KW_polar_a, startPos, word.length())); isKW=true; break;
@@ -594,8 +621,7 @@ public class Scanner {
 									case "log": tokens.add(new Token(Kind.KW_log, startPos, word.length())); isKW=true; break;
 									case "image": tokens.add(new Token(Kind.KW_image, startPos, word.length())); isKW=true; break;
 									case "int": tokens.add(new Token(Kind.KW_int, startPos, word.length())); isKW=true; break;
-									case "float": tokens.add(new Token(Kind.KW_float, startPos, word.length())); isKW=true; break;
-									case "filename": tokens.add(new Token(Kind.KW_filename, startPos, word.length())); isKW=true; break;
+									case "if": tokens.add(new Token(Kind.KW_if, startPos, word.length())); isKW=true; break;
 									case "boolean": tokens.add(new Token(Kind.KW_boolean, startPos, word.length())); isKW=true; break;
 									case "red": tokens.add(new Token(Kind.KW_red, startPos, word.length())); isKW=true; break;
 									case "blue": tokens.add(new Token(Kind.KW_blue, startPos, word.length())); isKW=true; break;

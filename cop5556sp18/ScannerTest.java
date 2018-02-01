@@ -427,6 +427,60 @@ public class ScannerTest {
 	}
 
 	@Test
+	public void testFailedSubmissionCases() throws LexicalException {
+		String inp ="";
+		Scanner scanner;
+		inp = "to from if filename float fl";
+		scanner = new Scanner(inp).scan();
+		show(inp);
+		show(scanner);
+		checkNext(scanner, KW_to, 0, 2, 1, 1);
+		checkNext(scanner, KW_from, 3, 4, 1, 4);
+		checkNext(scanner, KW_if, 8, 2, 1, 9);
+		checkNext(scanner, KW_filename, 11, 8, 1, 12);
+		checkNext(scanner, KW_float, 20, 5, 1, 21);
+		checkNext(scanner, IDENTIFIER, 26, 2, 1, 27);
+		inp = "image int float boolean";
+		scanner = new Scanner(inp).scan();
+		show(inp);
+		show(scanner);
+		checkNext(scanner, KW_image, 0, 5, 1, 1);
+		checkNext(scanner, KW_int, 6, 3, 1, 7);
+		checkNext(scanner, KW_float, 10, 5, 1, 11);
+		checkNext(scanner, KW_boolean, 16, 7, 1, 17);
+		inp = "0 1 2 3 4 5 6 7 8 9";
+		scanner = new Scanner(inp).scan();
+		show(inp);
+		show(scanner);
+		checkNext(scanner, INTEGER_LITERAL, 0, 1, 1, 1);
+		checkNext(scanner, INTEGER_LITERAL, 2, 1, 1, 3);
+		checkNext(scanner, INTEGER_LITERAL, 4, 1, 1, 5);
+		checkNext(scanner, INTEGER_LITERAL, 6, 1, 1, 7);
+		checkNext(scanner, INTEGER_LITERAL, 8, 1, 1, 9);
+		checkNext(scanner, INTEGER_LITERAL, 10, 1, 1, 11);
+		checkNext(scanner, INTEGER_LITERAL, 12, 1, 1, 13);
+		checkNext(scanner, INTEGER_LITERAL, 14, 1, 1, 15);
+		checkNext(scanner, INTEGER_LITERAL, 16, 1, 1, 17);
+		checkNext(scanner, INTEGER_LITERAL, 18, 1, 1, 19);
+		inp = "sin_ sin$ Sin";
+		scanner = new Scanner(inp).scan();
+		show(inp);
+		show(scanner);
+		checkNext(scanner, IDENTIFIER, 0, 4, 1, 1);
+		checkNext(scanner, IDENTIFIER, 5, 4, 1, 6);
+		checkNext(scanner, IDENTIFIER, 10, 3, 1, 11);
+		inp = "trued falsed true_ false_";
+		scanner = new Scanner(inp).scan();
+		show(inp);
+		show(scanner);
+		checkNext(scanner,IDENTIFIER,0,5,1,1);
+		checkNext(scanner,IDENTIFIER,6,6,1,7);
+		checkNext(scanner,IDENTIFIER,13,5,1,14);
+		checkNext(scanner,IDENTIFIER,19,6,1,20);
+
+	}
+
+	@Test
 	public void testLineOfCode() throws LexicalException {
 		String inp = "default_width := blue_not$kw + cart_x ** pola2r_Bb <<  Z\n\talpha :=\tawesome ** sin .234 + atan 66";
 		Scanner scanner = new Scanner(inp).scan();
