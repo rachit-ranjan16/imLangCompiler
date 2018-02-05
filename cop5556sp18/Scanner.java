@@ -546,7 +546,7 @@ public class Scanner {
 								boolean isKwOrBoolLit = false;
 								//Extract alphabets till none are left - this will only catch keywords at best
 								String word = "";
-								while(Character.isAlphabetic(chars[pos])) {
+								while(Character.isAlphabetic(chars[pos]) || Character.isDigit(chars[pos])) {
 									word += chars[pos++];
 									if (chars[pos] == '_' || chars[pos] =='$') word+= chars[pos++];
 								}
