@@ -477,12 +477,12 @@ public class ScannerTest {
 		checkNext(scanner,IDENTIFIER,6,6,1,7);
 		checkNext(scanner,IDENTIFIER,13,5,1,14);
 		checkNext(scanner,IDENTIFIER,19,6,1,20);
-		inp = "true false true0 0false";
+		inp = "true sleep true0 0false";
 		scanner = new Scanner(inp).scan();
 		show(inp);
 		show(scanner);
 		checkNext(scanner,BOOLEAN_LITERAL,0,4,1,1);
-		checkNext(scanner,BOOLEAN_LITERAL,5,5,1,6);
+		checkNext(scanner,KW_sleep,5,5,1,6);
 		checkNext(scanner,IDENTIFIER,11,5,1,12);
 		checkNext(scanner,INTEGER_LITERAL,17,1,1,18);
 		checkNext(scanner,BOOLEAN_LITERAL,18,5,1,19);

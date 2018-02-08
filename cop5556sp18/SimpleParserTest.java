@@ -17,12 +17,13 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import cop5556sp18.SimpleParser;
-import cop5556sp18.Scanner;
 import cop5556sp18.SimpleParser.SyntaxException;
+import cop5556sp18.SimpleParser.UnSupportedOperationException;
 import cop5556sp18.Scanner.LexicalException;
 
-public class SimpleParserTest {
+import static org.junit.Assert.assertEquals;
+
+ public class SimpleParserTest {
 
 	//set Junit to be able to catch exceptions
 	@Rule
@@ -58,7 +59,7 @@ public class SimpleParserTest {
 	 * @throws SyntaxException 
 	 */
 	@Test
-	public void testEmpty() throws LexicalException, SyntaxException {
+	public void testEmpty() throws LexicalException, SyntaxException, UnSupportedOperationException {
 		String input = "";  //The input is the empty string.  
 		SimpleParser parser = makeParser(input);
 		thrown.expect(SyntaxException.class);
@@ -72,7 +73,7 @@ public class SimpleParserTest {
 	 * @throws SyntaxException 
 	 */
 	@Test
-	public void testSmallest() throws LexicalException, SyntaxException {
+	public void testSmallest() throws LexicalException, SyntaxException, UnSupportedOperationException {
 		String input = "b{}";  
 		SimpleParser parser = makeParser(input);
 		parser.parse();
@@ -82,12 +83,47 @@ public class SimpleParserTest {
 	//This test should pass in your complete parser.  It will fail in the starter code.
 	//Of course, you would want a better error message. 
 	@Test
-	public void testDec0() throws LexicalException, SyntaxException {
-		String input = "b{int c;}";
-		SimpleParser parser = makeParser(input);
+	public void testDec0() throws LexicalException, SyntaxException, UnSupportedOperationException {
+		String inp = "b{image c;}";
+		SimpleParser parser = makeParser(inp);
 		parser.parse();
 	}
-	
+
+	@Test
+	public void testInvalidStartOfBlock() throws LexicalException, SyntaxException, UnSupportedOperationException {
+
+		String inp = "false { image tr; }";
+		thrown.expect(SyntaxException.class);
+		try {
+			SimpleParser simpleParser = makeParser(inp);
+			simpleParser.parse();
+		}
+		catch (SyntaxException e){
+			show(e);
+			throw e;
+		}
+	}
+
+	@Test
+	 public void testImageExpressionDeclaration() throws LexicalException, SyntaxException, UnSupportedOperationException {
+		//TODO Add more cases for Expressions
+		String inp ;
+		SimpleParser parser;
+		inp = "falsed { \n image img /* Some Comment */ [ 256, 256 ];\n}";
+		parser = makeParser(inp);
+		parser.parse();
+	}
+
+	@Test
+	 public void testStatements() throws LexicalException, SyntaxException, UnSupportedOperationException {
+		//TODO Add more cases for Statements
+		String inp ;
+		SimpleParser parser;
+		inp= "trued { write x to y;  }";
+		parser = makeParser(inp);
+		parser.parse();
+
+	}
 
 }
 	

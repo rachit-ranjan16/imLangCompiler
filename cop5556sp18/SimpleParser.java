@@ -31,6 +31,14 @@ public class SimpleParser {
 
 	}
 
+	public static class UnSupportedOperationException extends Exception {
+//		Token t;
+		public UnSupportedOperationException(String message) {
+			super(message);
+//			this.t = t;
+		}
+	}
+
 
 
 	Scanner scanner;
@@ -42,7 +50,7 @@ public class SimpleParser {
 	}
 
 
-	public void parse() throws SyntaxException {
+	public void parse() throws SyntaxException, UnSupportedOperationException {
 		program();
 		matchEOF();
 	}
@@ -50,7 +58,7 @@ public class SimpleParser {
 	/*
 	 * Program ::= Identifier Block
 	 */
-	public void program() throws SyntaxException {
+	public void program() throws SyntaxException, UnSupportedOperationException {
 		match(IDENTIFIER);
 		block();
 	}
@@ -60,30 +68,108 @@ public class SimpleParser {
 	 */
 	
 	Kind[] firstDec = { KW_int, KW_boolean, KW_image, KW_float, KW_filename };
-	Kind[] firstStatement = {/* TODO  correct this */  };
+	Kind[] firstType = { KW_int, KW_boolean, KW_image, KW_float, KW_filename };
+	Kind[] firstStatement = { KW_input, KW_write, KW_while, KW_if, KW_show, KW_sleep, IDENTIFIER, KW_red, KW_blue, KW_green, KW_alpha};
+	Kind[] firstPixelSelector = {LSQUARE};
+	Kind[] firstColor = {KW_red, KW_green, KW_blue, KW_alpha};
+	Kind[] firstLHS = {IDENTIFIER, KW_red, KW_green, KW_blue, KW_alpha };
 
-	public void block() throws SyntaxException {
+	public void block() throws SyntaxException, UnSupportedOperationException {
 		match(LBRACE);
 		while (isKind(firstDec)|isKind(firstStatement)) {
-	     if (isKind(firstDec)) {
-			declaration();
-		} else if (isKind(firstStatement)) {
-			statement();
-		}
+			if (isKind(firstDec)) {
+				declaration();
+			}
+			else if (isKind(firstStatement)) {
+				statement();
+			}
 			match(SEMI);
 		}
 		match(RBRACE);
 
 	}
-	
-	public void declaration() {
-		//TODO
-		throw new UnsupportedOperationException();
+	/*
+	Declaration ::= Type IDENTIFIER | image IDENTIFIER [ Expression , Expression ]
+	 */
+	public void declaration() throws SyntaxException, UnSupportedOperationException {
+		if (isKind(firstType)) {
+			type();
+			match(IDENTIFIER);
+			if (t.getKind() == LSQUARE) {
+				match(LSQUARE);
+				expression();
+				match(COMMA);
+				expression();
+				match(RSQUARE);
+			}
+		}
 	}
-	
-	public void statement() {
-		//TODO
-		throw new UnsupportedOperationException();
+
+	/*
+	Statement ::= StatementInput | StatementWrite | StatementAssignment
+		| StatementWhile | StatementIf | StatementShow | StatementSleep
+	 */
+	public void statement() throws SyntaxException, UnSupportedOperationException {
+		switch (t.getKind()) {
+			// StatementInput ::= input IDENTIFIER from @ Expression
+			case KW_input: match(KW_input);match(IDENTIFIER);match(KW_from);match(OP_AT);expression();break;
+			// StatementWrite ::= write IDENTIFIER to IDENTIFIER
+			case KW_write: match(KW_write);match(IDENTIFIER);match(KW_to);match(IDENTIFIER);break;
+			// StatementWhile ::=  while (Expression ) Block
+			case KW_while: match(KW_while);match(LPAREN);expression();match(RPAREN);block();break;
+			// StatementIf ::=  if ( Expression ) Block
+			case KW_if: match(KW_if);match(LPAREN);expression();match(RPAREN);block();break;
+			// StatementShow ::=  show Expression
+			case KW_show: match(KW_show);expression();break;
+			// StatementSleep ::=  sleep Expression
+			case KW_sleep: match(KW_sleep);expression();break;
+		}
+		// StatementAssignment ::=  LHS := Expression
+		if (isKind(firstLHS)) { lhs();match(OP_ASSIGN);expression(); }
+	}
+
+	/*
+	LHS ::=  IDENTIFIER | IDENTIFIER PixelSelector | Color ( IDENTIFIER PixelSelector )
+	 */
+	public void lhs() throws SyntaxException, UnSupportedOperationException {
+		if (t.getKind() == IDENTIFIER) { match(IDENTIFIER); if (isKind(firstPixelSelector)) pixelSelector();}
+		else if(isKind(firstColor)) color();
+	}
+	/*
+	Color ::= red | green | blue | alpha
+	 */
+	public void color() throws SyntaxException, UnSupportedOperationException {
+		switch (t.getKind()) {
+			case KW_red: match(KW_red);match(LPAREN);match(IDENTIFIER);pixelSelector();match(RPAREN);break;
+			case KW_green: match(KW_green);match(LPAREN);match(IDENTIFIER);pixelSelector();match(RPAREN);break;
+			case KW_blue: match(KW_blue);match(LPAREN);match(IDENTIFIER);pixelSelector();match(RPAREN);break;
+			case KW_alpha: match(KW_alpha);match(LPAREN);match(IDENTIFIER);pixelSelector();match(RPAREN);break;
+		}
+	}
+
+	/*
+	PixelSelector ::= [ Expression , Expression ]
+	 */
+	private void pixelSelector() throws SyntaxException, UnSupportedOperationException {
+		match(LSQUARE); expression(); match(COMMA); expression(); match(RSQUARE);
+	}
+
+	//Kind[] firstStatement = { KW_input, KW_write, KW_while, KW_if, KW_show, KW_sleep, IDENTIFIER, KW_red, KW_blue, KW_green, KW_alpha};
+	public void type() throws SyntaxException, UnSupportedOperationException {
+		switch (t.getKind()) {
+			case KW_int: match(KW_int);break;
+			case KW_float: match(KW_float);break;
+			case KW_boolean: match(KW_boolean);break;
+			case KW_filename: match(KW_filename);break;
+			case KW_image: match(KW_image);break;
+			default: throw new SyntaxException(t,"Syntax Error while parsing Token=" + t.getText() + " " + t.line() + ":" + t.posInLine());
+		}
+	}
+
+
+	public void expression() throws SyntaxException, UnSupportedOperationException {
+		//TODO Add Implementation
+		throw new UnSupportedOperationException("Expression not yet supported");
 	}
 
 	protected boolean isKind(Kind kind) {
@@ -112,14 +198,14 @@ public class SimpleParser {
 			consume();
 			return tmp;
 		}
-		throw new SyntaxException(t,"Syntax Error"); //TODO  give a better error message!
+		throw new SyntaxException(t,"Syntax Error while parsing Token=" + t.getText() + " " + t.line() + ":" + t.posInLine());
 	}
 
 
 	private Token consume() throws SyntaxException {
 		Token tmp = t;
 		if (isKind( EOF)) {
-			throw new SyntaxException(t,"Syntax Error"); //TODO  give a better error message!  
+			throw new SyntaxException(t,"Syntax Error while parsing Token=" + t.getText() + " " + t.line() + ":" + t.posInLine());
 			//Note that EOF should be matched by the matchEOF method which is called only in parse().  
 			//Anywhere else is an error. */
 		}
