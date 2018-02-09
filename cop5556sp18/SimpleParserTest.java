@@ -21,8 +21,6 @@ import cop5556sp18.SimpleParser.SyntaxException;
 import cop5556sp18.SimpleParser.UnSupportedOperationException;
 import cop5556sp18.Scanner.LexicalException;
 
-import static org.junit.Assert.assertEquals;
-
  public class SimpleParserTest {
 
 	//set Junit to be able to catch exceptions
@@ -78,10 +76,7 @@ import static org.junit.Assert.assertEquals;
 		SimpleParser parser = makeParser(input);
 		parser.parse();
 	}	
-	
-	
-	//This test should pass in your complete parser.  It will fail in the starter code.
-	//Of course, you would want a better error message. 
+
 	@Test
 	public void testDec0() throws LexicalException, SyntaxException, UnSupportedOperationException {
 		String inp = "b{image c;}";
@@ -106,24 +101,156 @@ import static org.junit.Assert.assertEquals;
 
 	@Test
 	 public void testImageExpressionDeclaration() throws LexicalException, SyntaxException, UnSupportedOperationException {
-		//TODO Add more cases for Expressions
 		String inp ;
 		SimpleParser parser;
 		inp = "falsed { \n image img /* Some Comment */ [ 256, 256 ];\n}";
+		parser = makeParser(inp);
+		parser.parse();
+		inp = "falsed { \n image img /* Some Comment */ [ a+e, b+c ];\n}";
 		parser = makeParser(inp);
 		parser.parse();
 	}
 
 	@Test
 	 public void testStatements() throws LexicalException, SyntaxException, UnSupportedOperationException {
-		//TODO Add more cases for Statements
 		String inp ;
 		SimpleParser parser;
-		inp= "trued { write x to y;  }";
+		inp = "trued { write x to y;  }";
 		parser = makeParser(inp);
 		parser.parse();
 
 	}
+
+	@Test
+	public void testInvalidStatement() throws LexicalException, SyntaxException, UnSupportedOperationException {
+		String inp;
+		SimpleParser parser;
+		inp = "image some_image;inpu hold fom @0;show yolo;";
+		thrown.expect(SyntaxException.class);
+		try {
+			SimpleParser simpleParser = makeParser(inp);
+			simpleParser.parse();
+		} catch (SyntaxException e) {
+			show(e);
+			throw e;
+		}
+	}
+
+	 @Test
+	 public void testAnotherInvalidStatement() throws LexicalException, SyntaxException, UnSupportedOperationException {
+		String inp = "something{int x; int x:=1.2.3..}";
+		thrown.expect(SyntaxException.class);
+		try {
+			SimpleParser simpleParser = makeParser(inp);
+			simpleParser.parse();
+		}
+		catch (SyntaxException e){
+			show(e);
+			throw e;
+		}
+	}
+	 @Test
+	 public void testRotateImageValidCode() throws LexicalException, SyntaxException, UnSupportedOperationException {
+		 String input = "rotateImage{" +
+				 			"image h;" +
+				 			"input h from @0;" +
+				 			"show h;" +
+				 			"sleep(4000); " +
+				 			"image g[width(h),height(h)];" +
+				 			"int x;" +
+				 			"x := 0;" +
+				 			"while(x<width(g)){" +
+				 				"int y;" +
+				 				"y := 0;" +
+				 				"while(y<height(g)){" +
+				 					"g[x,y] := h[y,x];" +
+				 					"y := y + 1;" +
+				 				"};" +
+				 				"x := x + 1;" +
+				 			"};" +
+				 			"show g;" +
+				 			"sleep(4000);" +
+				 		"}";
+		 SimpleParser parser = makeParser(input);
+		 parser.parse();
+	 }
+
+	 @Test
+	 public void testTurnImageGreenAndBlueValidCode() throws LexicalException, SyntaxException, UnSupportedOperationException {
+		 String input =
+				 "invertColors{" +
+				 	"image img[256,256];" +
+				 	"int x;" +
+				 	"int y;" +
+				 	"x:=0;" +
+				 	"y:=0;" +
+				 	"while(x<width(img)) {" +
+				 		"y:=0;" +
+				 		"while(y<height(img)) {" +
+				 			"im[x,y]:=<<0,255,255,0>>;" +
+				 			"y:=y+1;" +
+						 "};" +
+				 		"x:=x+1;" +
+				 	"};" +
+				 	"show img;" +
+				 "}";
+		 SimpleParser parser = makeParser(input);
+		 parser.parse();
+	 }
+
+	 @Test
+	 public void testPolarRotationValidCode() throws LexicalException, SyntaxException, UnSupportedOperationException {
+		 String input = "PolarR2{" +
+				 			"image img[2048,2048];" +
+				 			"int x;" +
+				 			"x := 0;" +
+				 			"while(x < width(img)) {" +
+				 				"int y;" +
+				 				"y := 0;" +
+				 				"while( y < height(img)) {" +
+				 					"float p;" +
+				 					"p := polar_r[x,y];" +
+				 					"int r;" +
+				 					"r := int(p)%Z;" +
+				 					"img[x,y] := <<Z,0,0,r>>;" +
+				 					"y := y+1;" +
+				 				"};" +
+				 				"x:=x+1;" +
+				 			"};" +
+				 			"show img;" +
+				 		"}";
+		 SimpleParser parser = makeParser(input);
+		 parser.parse();
+	 }
+
+	 @Test
+	 public void testInvertColorsValidCode() throws LexicalException, SyntaxException, UnSupportedOperationException {
+		 String input = "sample{" +
+				 			"image img;" +
+				 			"input img from @0;" +
+				 			"show img;" +
+				 			"sleep(4000);" +
+				 			"image img2[width(img),height(img)];" +
+				 			"int x;" +
+				 			"x := 0;" +
+				 			"while(x<width(img2)) {" +
+				 				"int y;" +
+				 				"y := 0;" +
+				 				"while( y< height(img2)) {" +
+				 					"blue(img2[x,y]) := red(img[x,y]);" +
+				 					"green(img2[x,y]) := blue(img[x,y]);" +
+				 					"red(img2[x,y]) := green(img[x,y]);" +
+				 					"alpha(img2[x,y]) := Z;" +
+				 "					y := y + 1;" +
+				 				"};" +
+				 				"x:= x + 1;" +
+				 			"};" +
+				 			"show img2;" +
+				 			"sleep(4000);" +
+				 		"}";
+		 SimpleParser parser = makeParser(input);
+		 parser.parse();
+	 }
 
 }
 	
