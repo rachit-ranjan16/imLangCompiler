@@ -30,16 +30,7 @@ public class SimpleParser {
 		}
 
 	}
-
-	public static class UnSupportedOperationException extends Exception {
-//		Token t;
-		public UnSupportedOperationException(String message) {
-			super(message);
-//			this.t = t;
-		}
-	}
-
-
+	
 
 	Scanner scanner;
 	Token t;
@@ -50,7 +41,7 @@ public class SimpleParser {
 	}
 
 
-	public void parse() throws SyntaxException, UnSupportedOperationException {
+	public void parse() throws SyntaxException{
 		program();
 		matchEOF();
 	}
@@ -58,7 +49,7 @@ public class SimpleParser {
 	/*
 	 * Program ::= Identifier Block
 	 */
-	public void program() throws SyntaxException, UnSupportedOperationException {
+	public void program() throws SyntaxException{
 		match(IDENTIFIER);
 		block();
 	}
@@ -89,7 +80,7 @@ public class SimpleParser {
 	};
 
 //	Block ::=  { (  (Declaration | Statement) ; )* }
-	public void block() throws SyntaxException, UnSupportedOperationException {
+	public void block() throws SyntaxException{
 		match(LBRACE);
 		while (isKind(firstDec)|isKind(firstStatement)) {
 			if (isKind(firstDec)) {
@@ -105,7 +96,7 @@ public class SimpleParser {
 	}
 
 //	Declaration ::= Type IDENTIFIER | image IDENTIFIER [ Expression , Expression ]
-	public void declaration() throws SyntaxException, UnSupportedOperationException {
+	public void declaration() throws SyntaxException{
 			type();
 			match(IDENTIFIER);
 			if (t.getKind() == LSQUARE) {
@@ -121,7 +112,7 @@ public class SimpleParser {
 	Statement ::= StatementInput | StatementWrite | StatementAssignment
 		| StatementWhile | StatementIf | StatementShow | StatementSleep
 	 */
-	public void statement() throws SyntaxException, UnSupportedOperationException {
+	public void statement() throws SyntaxException{
 		switch (t.getKind()) {
 
 			case KW_input:
@@ -149,13 +140,10 @@ public class SimpleParser {
 			case KW_alpha:
 				statementAssignment();
 				break;
-			//TODO Assure that this is unneeded
-//			default:
-//				throw new SyntaxException(t, "Syntax Error while parsing Token=" + t.getText() + " " + t.line() + ":" + t.posInLine());
 		}
 	}
 	// StatementAssignment ::=  LHS := Expression
-	private void statementAssignment() throws SyntaxException, UnSupportedOperationException {
+	private void statementAssignment() throws SyntaxException{
 
 		lhs();
 		match(OP_ASSIGN);
@@ -163,19 +151,19 @@ public class SimpleParser {
 	}
 
 	// StatementSleep ::=  sleep Expression
-	private void statementSleep() throws SyntaxException, UnSupportedOperationException {
+	private void statementSleep() throws SyntaxException{
 		match(KW_sleep);
 		expression();
 	}
 
 	// StatementShow ::=  show Expression
-	private void statementShow() throws SyntaxException, UnSupportedOperationException {
+	private void statementShow() throws SyntaxException{
 		match(KW_show);
 		expression();
 	}
 
 	// StatementIf ::=  if ( Expression ) Block
-	private void statementIf() throws SyntaxException, UnSupportedOperationException {
+	private void statementIf() throws SyntaxException{
 		match(KW_if);
 		match(LPAREN);
 		expression();
@@ -184,7 +172,7 @@ public class SimpleParser {
 	}
 
 	// StatementWhile ::=  while (Expression ) Block
-	private void statementWhile() throws SyntaxException, UnSupportedOperationException {
+	private void statementWhile() throws SyntaxException{
 		match(KW_while);
 		match(LPAREN);
 		expression();
@@ -201,7 +189,7 @@ public class SimpleParser {
 	}
 
 	// StatementInput ::= input IDENTIFIER from @ Expression
-	private void statementInput() throws SyntaxException, UnSupportedOperationException {
+	private void statementInput() throws SyntaxException{
 		match(KW_input);
 		match(IDENTIFIER);
 		match(KW_from);
@@ -211,7 +199,7 @@ public class SimpleParser {
 
 
 	//	LHS ::=  IDENTIFIER | IDENTIFIER PixelSelector | Color ( IDENTIFIER PixelSelector
-	public void lhs() throws SyntaxException, UnSupportedOperationException {
+	public void lhs() throws SyntaxException{
 			if (t.getKind() == IDENTIFIER) {
 				match(IDENTIFIER);
 				if (isKind(firstPixelSelector))
@@ -223,7 +211,7 @@ public class SimpleParser {
 
 
 //	Color ::= red | green | blue | alpha
-	public void color() throws SyntaxException, UnSupportedOperationException {
+	public void color() throws SyntaxException{
 		switch (t.getKind()) {
 			case KW_red:
 				match(KW_red);
@@ -253,15 +241,12 @@ public class SimpleParser {
 				pixelSelector();
 				match(RPAREN);
 				break;
-			//TODO Assure that this is unneeded
-//			default:
-//				throw new SyntaxException(t, "Syntax Error while parsing Token=" + t.getText() + " " + t.line() + ":" + t.posInLine());
 		}
 	}
 
 
 //	PixelSelector ::= [ Expression , Expression ]
-	private void pixelSelector() throws SyntaxException, UnSupportedOperationException {
+	private void pixelSelector() throws SyntaxException{
 		match(LSQUARE);
 		expression();
 		match(COMMA);
@@ -269,7 +254,7 @@ public class SimpleParser {
 		match(RSQUARE);
 	}
 
-	public void type() throws SyntaxException, UnSupportedOperationException {
+	public void type() throws SyntaxException{
 		switch (t.getKind()) {
 			case KW_int:
 				match(KW_int);
@@ -286,15 +271,12 @@ public class SimpleParser {
 			case KW_image:
 				match(KW_image);
 				break;
-	//TODO Assure that this is unneeded
-//			default:
-//				throw new SyntaxException(t, "Syntax Error while parsing Token=" + t.getText() + " " + t.line() + ":" + t.posInLine());
 		}
 	}
 
 //	Expression ::=  OrExpression  ?  Expression  :  Expression
 //	               |   OrExpression
-	public void expression() throws SyntaxException, UnSupportedOperationException {
+	public void expression() throws SyntaxException{
 			orExpression();
 			if (t.getKind() == OP_QUESTION) {
 				match(OP_QUESTION);
@@ -305,7 +287,7 @@ public class SimpleParser {
 		}
 
 //	OrExpression  ::=  AndExpression   (  |  AndExpression ) *
-	public void orExpression() throws SyntaxException, UnSupportedOperationException {
+	public void orExpression() throws SyntaxException{
 		andExpression();
 		while(t.getKind() == OP_OR) {
 			match(OP_OR);
@@ -314,7 +296,7 @@ public class SimpleParser {
 	}
 
 //	AndExpression ::=  EqExpression ( & EqExpression )*
-	public void andExpression() throws SyntaxException, UnSupportedOperationException {
+	public void andExpression() throws SyntaxException{
 		eqExpression();
 		while(t.getKind() == OP_AND) {
 			match(OP_AND);
@@ -323,7 +305,7 @@ public class SimpleParser {
 	}
 
 // EqExpression ::=  RelExpression  (  (== | != )  RelExpression )*
-	public void eqExpression() throws SyntaxException, UnSupportedOperationException {
+	public void eqExpression() throws SyntaxException{
 		relExpression();
 		while(t.getKind() == OP_EQ | t.getKind() == OP_NEQ) {
 			switch (t.getKind()) {
@@ -339,7 +321,7 @@ public class SimpleParser {
 	}
 
 //	RelExpression ::= AddExpression (  (<  | > |  <=  | >= )   AddExpression)*
-	public void relExpression() throws SyntaxException, UnSupportedOperationException {
+	public void relExpression() throws SyntaxException{
 		addExpression();
 		while(t.getKind() == OP_LT |
 				t.getKind() == OP_LE |
@@ -364,7 +346,7 @@ public class SimpleParser {
 	}
 
 //	AddExpression ::= MultExpression   (  ( + | - ) MultExpression )*
-	public void addExpression() throws SyntaxException, UnSupportedOperationException {
+	public void addExpression() throws SyntaxException{
 		multExpression();
 		while(t.getKind() == OP_PLUS | t.getKind() == OP_MINUS) {
 			switch (t.getKind()) {
@@ -381,7 +363,7 @@ public class SimpleParser {
 	}
 
 //	MultExpression := PowerExpression ( ( * | /  | % ) PowerExpression )*
-	public void multExpression() throws SyntaxException, UnSupportedOperationException {
+	public void multExpression() throws SyntaxException{
 		powerExpression();
 		while(t.getKind() == OP_TIMES | t.getKind() == OP_DIV | t.getKind() == OP_MOD) {
 			switch (t.getKind()) {
@@ -400,7 +382,7 @@ public class SimpleParser {
 	}
 
 //	PowerExpression := UnaryExpression  (** PowerExpression | ε)
-	public void powerExpression() throws SyntaxException, UnSupportedOperationException {
+	public void powerExpression() throws SyntaxException{
 		unaryExpression();
 		if(t.getKind() == OP_POWER) {
 			match(OP_POWER);
@@ -408,7 +390,7 @@ public class SimpleParser {
 		}
 	}
 //	UnaryExpression ::= + UnaryExpression | - UnaryExpression | UnaryExpressionNotPlusMinus
-	public void unaryExpression() throws SyntaxException, UnSupportedOperationException {
+	public void unaryExpression() throws SyntaxException{
 		if(t.getKind() == OP_PLUS | t.getKind() == OP_MINUS) {
 			switch (t.getKind()) {
 				case OP_PLUS:
@@ -428,7 +410,7 @@ public class SimpleParser {
 	}
 
 //	UnaryExpressionNotPlusMinus ::=  ! UnaryExpression  | Primary
-	public void unaryExpressionNotPlusOrMinus() throws SyntaxException, UnSupportedOperationException {
+	public void unaryExpressionNotPlusOrMinus() throws SyntaxException{
 		switch (t.getKind()) {
 			case OP_EXCLAMATION:
 				match(OP_EXCLAMATION);
@@ -437,19 +419,17 @@ public class SimpleParser {
 			default:
 				if (isKind(firstPrimary))
 					primary();
-				//TODO Assure that this is unneeded
-//				else throw new SyntaxException(t, "Syntax Error while parsing Token=" + t.getText() + " " + t.line() + ":" + t.posInLine());
 		}
 	}
 
 //	PixelExpression ::= IDENTIFIER PixelSelector
-	public void pixelExpression() throws SyntaxException, UnSupportedOperationException {
+	public void pixelExpression() throws SyntaxException{
 		match(IDENTIFIER);
 		pixelSelector();
 	}
 
 //	FunctionApplication ::= FunctionName ( Expression )  | FunctionName  [ Expression , Expression ]
-	public void functionApplication() throws SyntaxException, UnSupportedOperationException {
+	public void functionApplication() throws SyntaxException{
 		functionName();
 		switch(t.getKind()) {
 			case LPAREN:
@@ -464,13 +444,11 @@ public class SimpleParser {
 				expression();
 				match(RSQUARE);
 				break;
-//			default:
-//				throw new SyntaxException(t, "Syntax Error while parsing Token=" + t.getText() + " " + t.line() + ":" + t.posInLine());
 		}
 	}
 
 //	PredefinedName ::= Z | default_height | default_width
-	public void predefinedName() throws SyntaxException, UnSupportedOperationException {
+	public void predefinedName() throws SyntaxException{
 		switch (t.getKind()) {
 			case KW_Z:
 				match(KW_Z);
@@ -481,21 +459,18 @@ public class SimpleParser {
 			case KW_default_width:
 				match(KW_default_width);
 				break;
-				//TODO Assure that this is unneeded
-//			default:
-//				throw new SyntaxException(t, "Syntax Error while parsing Token=" + t.getText() + " " + t.line() + ":" + t.posInLine());
 		}
 	}
 
 //	PixelConstructor ::=  <<  Expression , Expression , Expression , Expression  >>
-	public void pixelConstructor() throws SyntaxException, UnSupportedOperationException {
+	public void pixelConstructor() throws SyntaxException{
 		match(LPIXEL); expression(); match(COMMA); expression(); match(COMMA); expression(); match(COMMA); expression(); match(RPIXEL);
 	}
 
 //	Primary ::= INTEGER_LITERAL | BOOLEAN_LITERAL | FLOAT_LITERAL |
 //			( Expression ) | FunctionApplication  | IDENTIFIER | PixelExpression |
 //	PredefinedName | PixelConstructor
-	public void primary() throws SyntaxException, UnSupportedOperationException {
+	public void primary() throws SyntaxException{
 		switch (t.getKind()) {
 			case INTEGER_LITERAL:
 				match(INTEGER_LITERAL);
@@ -525,14 +500,12 @@ public class SimpleParser {
 					predefinedName();
 				else if (isKind(firstPixelConstructor))
 					pixelConstructor();
-				//TODO Assure that this is unneeded
-//				else throw new SyntaxException(t, "Syntax Error while parsing Token=" + t.getText() + " " + t.line() + ":" + t.posInLine());
 		}
 	}
 
 //	FunctionName ::= sin | cos | atan | abs | log | cart_x | cart_y | polar_a | polar_r
 //	int | float | width | height | Color
-	public void functionName() throws SyntaxException, UnSupportedOperationException {
+	public void functionName() throws SyntaxException{
 		switch (t.getKind()) {
 			case KW_sin:
 				match(KW_sin);
