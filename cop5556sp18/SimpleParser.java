@@ -204,43 +204,25 @@ public class SimpleParser {
 				match(IDENTIFIER);
 				if (isKind(firstPixelSelector))
 					pixelSelector();
-			} else if (isKind(firstColor)) color();
-				//TODO Assure that this is unneeded
-//			else throw new SyntaxException(t,"Syntax Error while parsing Token=" + t.getText() + " " + t.line() + ":" + t.posInLine());
+			} else if (isKind(firstColor)) {
+				color();
+				match(LPAREN);
+				match(IDENTIFIER);
+				pixelSelector();
+				match(RPAREN);
+
+			}
+			else throw new SyntaxException(t,"Syntax Error while parsing Token=" + t.getText() + " " + t.line() + ":" + t.posInLine());
 		}
 
 
 //	Color ::= red | green | blue | alpha
 	public void color() throws SyntaxException{
 		switch (t.getKind()) {
-			case KW_red:
-				match(KW_red);
-				match(LPAREN);
-				match(IDENTIFIER);
-				pixelSelector();
-				match(RPAREN);
-				break;
-			case KW_green:
-				match(KW_green);
-				match(LPAREN);
-				match(IDENTIFIER);
-				pixelSelector();
-				match(RPAREN);
-				break;
-			case KW_blue:
-				match(KW_blue);
-				match(LPAREN);
-				match(IDENTIFIER);
-				pixelSelector();
-				match(RPAREN);
-				break;
-			case KW_alpha:
-				match(KW_alpha);
-				match(LPAREN);
-				match(IDENTIFIER);
-				pixelSelector();
-				match(RPAREN);
-				break;
+			case KW_red: match(KW_red);break;
+			case KW_green: match(KW_green);break;
+			case KW_blue: match(KW_blue);break;
+			case KW_alpha: match(KW_alpha);break;
 		}
 	}
 
@@ -405,8 +387,7 @@ public class SimpleParser {
 		else if (isKind(firstUnaryExpressionNotPlusOrMinus)) {
 			unaryExpressionNotPlusOrMinus();
 		}
-		//TODO Assure that this is unneeded
-//		else throw new SyntaxException(t,"Syntax Error while parsing Token=" + t.getText() + " " + t.line() + ":" + t.posInLine());
+		else throw new SyntaxException(t,"Syntax Error while parsing Token=" + t.getText() + " " + t.line() + ":" + t.posInLine());
 	}
 
 //	UnaryExpressionNotPlusMinus ::=  ! UnaryExpression  | Primary
