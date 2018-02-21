@@ -1,6 +1,6 @@
 package cop5556sp18;
 /* *
- * Initial code for SimpleParser for the class project in COP5556 Programming Language Principles 
+ * Initial code for Parser for the class project in COP5556 Programming Language Principles
  * at the University of Florida, Spring 2018.
  * 
  * This software is solely for the educational benefit of students 
@@ -16,9 +16,13 @@ package cop5556sp18;
 import cop5556sp18.Scanner.Token;
 import cop5556sp18.Scanner.Kind;
 import static cop5556sp18.Scanner.Kind.*;
+import cop5556sp18.AST.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
-public class SimpleParser {
+public class Parser {
 	
 	@SuppressWarnings("serial")
 	public static class SyntaxException extends Exception {
@@ -35,28 +39,40 @@ public class SimpleParser {
 	Scanner scanner;
 	Token t;
 
-	SimpleParser(Scanner scanner) {
+	Parser(Scanner scanner) {
 		this.scanner = scanner;
 		t = scanner.nextToken();
 	}
 
 
-	public void parse() throws SyntaxException{
-		program();
+	public Program parse() throws SyntaxException{
+		Program p = null;
+		p = program();
 		matchEOF();
+		return p;
 	}
 
 	/*
 	 * Program ::= Identifier Block
 	 */
-	public void program() throws SyntaxException{
-		match(IDENTIFIER);
-		block();
+	public Program program() throws SyntaxException{
+		Block b = null;
+		Program p = null;
+		Token firstToken = null;
+		if(isKind(IDENTIFIER)) {
+			firstToken = match(IDENTIFIER);
+			b = block();
+			p = new Program(firstToken,firstToken,b);
+		}
+		else error();
+		return p;
+
 	}
-	
-	/*
-	 * Block ::=  { (  (Declaration | Statement) ; )* }
-	 */
+
+	private void error() throws SyntaxException {
+		throw new SyntaxException(t,"Syntax Error while parsing Token=" + t.getText() + " " + t.line() + ":" + t.posInLine());
+	}
+
 	
 	Kind[] firstDec = { KW_int, KW_boolean, KW_image, KW_float, KW_filename };
 	Kind[] firstStatement = { KW_input, KW_write, KW_while, KW_if, KW_show, KW_sleep, IDENTIFIER, KW_red, KW_blue, KW_green, KW_alpha};
@@ -80,32 +96,41 @@ public class SimpleParser {
 	};
 
 //	Block ::=  { (  (Declaration | Statement) ; )* }
-	public void block() throws SyntaxException{
+	public Block block() throws SyntaxException{
+		List<ASTNode> decsOrStatements = new ArrayList<>();
+		Block b = null;
 		match(LBRACE);
+		Token firstToken = t;
 		while (isKind(firstDec)|isKind(firstStatement)) {
 			if (isKind(firstDec)) {
-				declaration();
+				decsOrStatements.add(declaration());
 			}
 			else if (isKind(firstStatement)) {
-				statement();
+//				TODO Remove this
+				decsOrStatements.add(null);
+//				decsOrStatements.add(statement());
 			}
 			match(SEMI);
 		}
 		match(RBRACE);
-
+		b = new Block(firstToken, decsOrStatements);
+		return b;
 	}
 
 //	Declaration ::= Type IDENTIFIER | image IDENTIFIER [ Expression , Expression ]
-	public void declaration() throws SyntaxException{
-			type();
-			match(IDENTIFIER);
+	public Declaration declaration() throws SyntaxException{
+			Expression e0 = null;
+			Expression e1 = null;
+			Token ty = type();
+			Token firstToken = match(IDENTIFIER);
 			if (t.getKind() == LSQUARE) {
 				match(LSQUARE);
-				expression();
+				e0 = expression();
 				match(COMMA);
-				expression();
+				e1 = expression();
 				match(RSQUARE);
 			}
+			return new Declaration(firstToken, ty, firstToken, e0, e1);
 	}
 
 	/*
@@ -143,7 +168,7 @@ public class SimpleParser {
 		}
 	}
 	// StatementAssignment ::=  LHS := Expression
-	private void statementAssignment() throws SyntaxException{
+	public void statementAssignment() throws SyntaxException{
 
 		lhs();
 		match(OP_ASSIGN);
@@ -151,19 +176,19 @@ public class SimpleParser {
 	}
 
 	// StatementSleep ::=  sleep Expression
-	private void statementSleep() throws SyntaxException{
+	public void statementSleep() throws SyntaxException{
 		match(KW_sleep);
 		expression();
 	}
 
 	// StatementShow ::=  show Expression
-	private void statementShow() throws SyntaxException{
+	public void statementShow() throws SyntaxException{
 		match(KW_show);
 		expression();
 	}
 
 	// StatementIf ::=  if ( Expression ) Block
-	private void statementIf() throws SyntaxException{
+	public void statementIf() throws SyntaxException{
 		match(KW_if);
 		match(LPAREN);
 		expression();
@@ -172,7 +197,7 @@ public class SimpleParser {
 	}
 
 	// StatementWhile ::=  while (Expression ) Block
-	private void statementWhile() throws SyntaxException{
+	public void statementWhile() throws SyntaxException{
 		match(KW_while);
 		match(LPAREN);
 		expression();
@@ -181,7 +206,7 @@ public class SimpleParser {
 	}
 
 	// StatementWrite ::= write IDENTIFIER to IDENTIFIER
-	private void statementWrite() throws SyntaxException {
+	public void statementWrite() throws SyntaxException {
 		match(KW_write);
 		match(IDENTIFIER);
 		match(KW_to);
@@ -189,7 +214,7 @@ public class SimpleParser {
 	}
 
 	// StatementInput ::= input IDENTIFIER from @ Expression
-	private void statementInput() throws SyntaxException{
+	public void statementInput() throws SyntaxException{
 		match(KW_input);
 		match(IDENTIFIER);
 		match(KW_from);
@@ -212,325 +237,404 @@ public class SimpleParser {
 				match(RPAREN);
 
 			}
-			else throw new SyntaxException(t,"Syntax Error while parsing Token=" + t.getText() + " " + t.line() + ":" + t.posInLine());
+			else error();
 		}
 
 
 //	Color ::= red | green | blue | alpha
-	public void color() throws SyntaxException{
+	public Token color() throws SyntaxException{
+		Token name = null;
 		switch (t.getKind()) {
-			case KW_red: match(KW_red);break;
-			case KW_green: match(KW_green);break;
-			case KW_blue: match(KW_blue);break;
-			case KW_alpha: match(KW_alpha);break;
+			case KW_red: name =  match(KW_red);break;
+			case KW_green: name =  match(KW_green);break;
+			case KW_blue: name =  match(KW_blue);break;
+			case KW_alpha: name =  match(KW_alpha);break;
 		}
+		return name;
 	}
 
 
 //	PixelSelector ::= [ Expression , Expression ]
-	private void pixelSelector() throws SyntaxException{
+	public PixelSelector pixelSelector() throws SyntaxException{
+		Token firstToken = t;
 		match(LSQUARE);
-		expression();
+		Expression e0 = expression();
 		match(COMMA);
-		expression();
+		Expression e1 = expression();
 		match(RSQUARE);
+		return new PixelSelector(firstToken, e0, e1);
 	}
 
-	public void type() throws SyntaxException{
+	public Token type() throws SyntaxException{
+		Token tmp = null;
 		switch (t.getKind()) {
 			case KW_int:
-				match(KW_int);
+				 tmp =  match(KW_int);
 				break;
 			case KW_float:
-				match(KW_float);
+				tmp =   match(KW_float);
 				break;
 			case KW_boolean:
-				match(KW_boolean);
+				tmp =   match(KW_boolean);
 				break;
 			case KW_filename:
-				match(KW_filename);
+				tmp =   match(KW_filename);
 				break;
 			case KW_image:
-				match(KW_image);
+				tmp =   match(KW_image);
 				break;
 		}
+		return tmp;
 	}
 
 //	Expression ::=  OrExpression  ?  Expression  :  Expression
 //	               |   OrExpression
-	public void expression() throws SyntaxException{
-			orExpression();
+	public Expression expression() throws SyntaxException{
+			Token firstToken = t;
+			Expression e0 = orExpression();
+			Expression e1 = null;
+			Expression e2 = null;
 			if (t.getKind() == OP_QUESTION) {
 				match(OP_QUESTION);
-				expression();
+				e1 = expression();
 				match(OP_COLON);
-				expression();
+				e2 = expression();
 			}
+			return new ExpressionConditional(firstToken,e0,e1,e2);
 		}
 
 //	OrExpression  ::=  AndExpression   (  |  AndExpression ) *
-	public void orExpression() throws SyntaxException{
-		andExpression();
+//	ExpressionBinary ::= Expression op Expression
+	public Expression orExpression() throws SyntaxException{
+		Token firstToken = t;
+		Expression e0 = andExpression();
 		while(t.getKind() == OP_OR) {
-			match(OP_OR);
-			andExpression();
+			Token op = match(OP_OR);
+			Expression e1 = andExpression();
+			e0 = new ExpressionBinary(firstToken, e0, op, e1);
 		}
+		return e0;
 	}
 
 //	AndExpression ::=  EqExpression ( & EqExpression )*
-	public void andExpression() throws SyntaxException{
-		eqExpression();
+	//ExpressionBinary ::= Expression op Expression
+	public Expression andExpression() throws SyntaxException{
+		Token firstToken = t;
+		Expression e0 = eqExpression();
 		while(t.getKind() == OP_AND) {
-			match(OP_AND);
-			eqExpression();
+			Token op = match(OP_AND);
+			Expression e1 = eqExpression();
+			e0 = new ExpressionBinary(firstToken, e0, op, e1);
 		}
+		return e0;
 	}
 
 // EqExpression ::=  RelExpression  (  (== | != )  RelExpression )*
-	public void eqExpression() throws SyntaxException{
-		relExpression();
+	//ExpressionBinary ::= Expression op Expression
+	public Expression eqExpression() throws SyntaxException{
+		Token firstToken = t;
+		Expression e0 = relExpression();
 		while(t.getKind() == OP_EQ | t.getKind() == OP_NEQ) {
+			Token op = null;
 			switch (t.getKind()) {
 				case OP_EQ:
-					match(OP_EQ);
+					op = match(OP_EQ);
 					break;
 				case OP_NEQ:
-					match(OP_NEQ);
+					op = match(OP_NEQ);
 					break;
 			}
-			relExpression();
+			Expression e1 = relExpression();
+			e0 = new ExpressionBinary(firstToken, e0, op, e1);
 		}
+		return e0;
 	}
 
 //	RelExpression ::= AddExpression (  (<  | > |  <=  | >= )   AddExpression)*
-	public void relExpression() throws SyntaxException{
-		addExpression();
+//ExpressionBinary ::= Expression op Expression
+	public Expression relExpression() throws SyntaxException{
+		Token firstToken = t;
+		Expression e0 = addExpression();
 		while(t.getKind() == OP_LT |
 				t.getKind() == OP_LE |
 				t.getKind() == OP_GT |
 				t.getKind() == OP_GE) {
+			Token op = null;
 			switch(t.getKind()) {
 				case OP_LT:
-					match(OP_LT);
+					op = match(OP_LT);
 					break;
 				case OP_LE:
-					match(OP_LE);
+					op = match(OP_LE);
 					break;
 				case OP_GT:
-					match(OP_GT);
+					op = match(OP_GT);
 					break;
 				case OP_GE:
-					match(OP_GE);
+					op = match(OP_GE);
 					break;
 			}
-			addExpression();
+			Expression e1 = addExpression();
+			e0 = new ExpressionBinary(firstToken, e0, op, e1);
 		}
+		return e0;
 	}
 
 //	AddExpression ::= MultExpression   (  ( + | - ) MultExpression )*
-	public void addExpression() throws SyntaxException{
-		multExpression();
-		while(t.getKind() == OP_PLUS | t.getKind() == OP_MINUS) {
+//ExpressionBinary ::= Expression op Expression
+	public Expression addExpression() throws SyntaxException {
+		Token firstToken = t;
+		Expression e0 = multExpression();
+		while (t.getKind() == OP_PLUS | t.getKind() == OP_MINUS) {
+			Token op = null;
 			switch (t.getKind()) {
 				case OP_PLUS:
-					match(OP_PLUS);
+					op = match(OP_PLUS);
 					break;
 				case OP_MINUS:
-					match(OP_MINUS);
+					op = match(OP_MINUS);
 					break;
 			}
-			multExpression();
+			Expression e1 = multExpression();
+			e0 = new ExpressionBinary(firstToken, e0, op, e1);
 		}
-
+		return e0;
 	}
 
 //	MultExpression := PowerExpression ( ( * | /  | % ) PowerExpression )*
-	public void multExpression() throws SyntaxException{
-		powerExpression();
+//ExpressionBinary ::= Expression op Expression
+	public Expression multExpression() throws SyntaxException{
+		Token firstToken = t;
+		Expression e0 = powerExpression();
 		while(t.getKind() == OP_TIMES | t.getKind() == OP_DIV | t.getKind() == OP_MOD) {
+			Token op = null;
 			switch (t.getKind()) {
 				case OP_TIMES:
-					match(OP_TIMES);
+					op = match(OP_TIMES);
 					break;
 				case OP_DIV:
-					match(OP_DIV);
+					op = match(OP_DIV);
 					break;
 				case OP_MOD:
-					match(OP_MOD);
+					op = match(OP_MOD);
 					break;
 			}
-			powerExpression();
+			Expression e1 = powerExpression();
+			e0 = new ExpressionBinary(firstToken, e0, op, e1);
 		}
+		return e0;
 	}
 
 //	PowerExpression := UnaryExpression  (** PowerExpression | ε)
-	public void powerExpression() throws SyntaxException{
-		unaryExpression();
+//	ExpressionBinary ::= Expression op Expression
+	public Expression powerExpression() throws SyntaxException{
+		Token firstToken = t;
+		Expression e0 = unaryExpression();
 		if(t.getKind() == OP_POWER) {
-			match(OP_POWER);
-			powerExpression();
+			Token op = match(OP_POWER);
+			Expression e1 = powerExpression();
+			e0 = new ExpressionBinary(firstToken, e0, op, e1);
 		}
+		return e0;
 	}
 //	UnaryExpression ::= + UnaryExpression | - UnaryExpression | UnaryExpressionNotPlusMinus
-	public void unaryExpression() throws SyntaxException{
+//	ExpressionUnary ::= Op Expression
+	public Expression unaryExpression() throws SyntaxException{
+		Token firstToken = t;
+		Token op = null;
+		Expression e0 = null;
 		if(t.getKind() == OP_PLUS | t.getKind() == OP_MINUS) {
 			switch (t.getKind()) {
 				case OP_PLUS:
-					match(OP_PLUS);
+					op = match(OP_PLUS);
 					break;
 				case OP_MINUS:
-					match(OP_MINUS);
+					op = match(OP_MINUS);
 					break;
 			}
-			unaryExpression();
+			Expression e1 = unaryExpression();
+			e0 = new ExpressionUnary(firstToken,op,e1);
 		}
-		else if (isKind(firstUnaryExpressionNotPlusOrMinus)) {
-			unaryExpressionNotPlusOrMinus();
-		}
-		else throw new SyntaxException(t,"Syntax Error while parsing Token=" + t.getText() + " " + t.line() + ":" + t.posInLine());
+		else if (isKind(firstUnaryExpressionNotPlusOrMinus))
+			e0 = unaryExpressionNotPlusOrMinus();
+		else error();
+		return e0;
 	}
 
 //	UnaryExpressionNotPlusMinus ::=  ! UnaryExpression  | Primary
-	public void unaryExpressionNotPlusOrMinus() throws SyntaxException{
+//	ExpressionUnary ::= Op Expression
+	public Expression unaryExpressionNotPlusOrMinus() throws SyntaxException{
+		Token firstToken = t;
+		Expression e0 = null;
+		Token op = null;
 		switch (t.getKind()) {
 			case OP_EXCLAMATION:
-				match(OP_EXCLAMATION);
-				unaryExpression();
+				op = match(OP_EXCLAMATION);
+				Expression e1 = unaryExpression();
+				e0 = new ExpressionUnary(firstToken,op,e1);
 				break;
 			default:
 				if (isKind(firstPrimary))
-					primary();
+					e0 = primary();
 		}
+		return e0;
 	}
 
 //	PixelExpression ::= IDENTIFIER PixelSelector
-	public void pixelExpression() throws SyntaxException{
-		match(IDENTIFIER);
-		pixelSelector();
+	public Expression pixelExpression() throws SyntaxException{
+		Token firstToken = t;
+		Token name = match(IDENTIFIER);
+		return new ExpressionPixel(firstToken, name, pixelSelector());
 	}
 
 //	FunctionApplication ::= FunctionName ( Expression )  | FunctionName  [ Expression , Expression ]
-	public void functionApplication() throws SyntaxException{
-		functionName();
+//	ExpressionFunctionAppWithPixel ::= FunctionName Expression Expression
+	public Expression functionApplication() throws SyntaxException{
+		Token firstToken = t;
+		Token functionName = functionName();
+		Expression e0 = null;
+		Expression e1 = null;
 		switch(t.getKind()) {
 			case LPAREN:
 				match(LPAREN);
-				expression();
+				e0 = expression();
 				match(RPAREN);
 				break;
 			case LSQUARE:
 				match(LSQUARE);
-				expression();
+				e0 = expression();
 				match(COMMA);
-				expression();
+				e1 = expression();
 				match(RSQUARE);
 				break;
 		}
+		return new ExpressionFunctionAppWithPixel(firstToken, functionName, e0, e1);
 	}
 
 //	PredefinedName ::= Z | default_height | default_width
-	public void predefinedName() throws SyntaxException{
+	// ExpressionPredefinedName
+	public Expression predefinedName() throws SyntaxException{
+		Token firstToken = t;
+		Expression e = null;
 		switch (t.getKind()) {
 			case KW_Z:
-				match(KW_Z);
+				e = new ExpressionPredefinedName(firstToken, match(KW_Z));
 				break;
 			case KW_default_height:
-				match(KW_default_height);
+				e = new ExpressionPredefinedName(firstToken, match(KW_default_height));
 				break;
 			case KW_default_width:
-				match(KW_default_width);
+				e = new ExpressionPredefinedName(firstToken, match(KW_default_width));
 				break;
 		}
+		return e;
 	}
 
 //	PixelConstructor ::=  <<  Expression , Expression , Expression , Expression  >>
-	public void pixelConstructor() throws SyntaxException{
-		match(LPIXEL); expression(); match(COMMA); expression(); match(COMMA); expression(); match(COMMA); expression(); match(RPIXEL);
+	public Expression pixelConstructor() throws SyntaxException {
+		Token firstToken = t;
+		match(LPIXEL);
+		Expression e0 = expression();
+		match(COMMA);
+		Expression e1 = expression();
+		match(COMMA);
+		Expression e2 = expression();
+		match(COMMA);
+		Expression e3 = expression();
+		match(RPIXEL);
+		return new ExpressionPixelConstructor(firstToken, e0, e1, e2, e3);
 	}
 
 //	Primary ::= INTEGER_LITERAL | BOOLEAN_LITERAL | FLOAT_LITERAL |
 //			( Expression ) | FunctionApplication  | IDENTIFIER | PixelExpression |
 //	PredefinedName | PixelConstructor
-	public void primary() throws SyntaxException{
+	public Expression primary() throws SyntaxException{
+		Token firstToken = t;
+		Token lit;
+		Expression e0 = null;
 		switch (t.getKind()) {
 			case INTEGER_LITERAL:
-				match(INTEGER_LITERAL);
+				lit = match(INTEGER_LITERAL);
+				e0 = new ExpressionIntegerLiteral(firstToken, lit);
 				break;
 			case BOOLEAN_LITERAL:
-				match(BOOLEAN_LITERAL);
+				lit = match(BOOLEAN_LITERAL);
+				e0 = new ExpressionBooleanLiteral(firstToken, lit);
 				break;
 			case FLOAT_LITERAL:
-				match(FLOAT_LITERAL);
+				lit = match(FLOAT_LITERAL);
+				e0 = new ExpressionFloatLiteral(firstToken, lit);
 				break;
 			case IDENTIFIER:
-				if(scanner.peek().getKind() == LSQUARE) {
-					pixelExpression();
-				}
-				else match(IDENTIFIER);
+				if(isKind(firstPixelExpression))
+					e0 = pixelExpression();
 				break;
 			case LPAREN:
 				match(LPAREN);
-				expression();
+				e0 = expression();
 				match(RPAREN);
 				break;
 			default:
 				if (isKind(firstPixelExpression))
-					pixelExpression();
+					e0 = pixelExpression();
 				else if (isKind(firstFunctionApplication))
-					functionApplication();
+					e0 = functionApplication();
 				else if (isKind(firstPredefinedName))
-					predefinedName();
+					e0 = predefinedName();
 				else if (isKind(firstPixelConstructor))
-					pixelConstructor();
+					e0 = pixelConstructor();
 		}
+		return e0;
 	}
 
 //	FunctionName ::= sin | cos | atan | abs | log | cart_x | cart_y | polar_a | polar_r
 //	int | float | width | height | Color
-	public void functionName() throws SyntaxException{
+	public Token functionName() throws SyntaxException{
+		Token name = null;
 		switch (t.getKind()) {
 			case KW_sin:
-				match(KW_sin);
+				name = match(KW_sin);
 				break;
 			case KW_cos:
-				match(KW_cos);
+				 name = match(KW_cos);
 				break;
 			case KW_atan:
-				match(KW_atan);
+				name = match(KW_atan);
 				break;
 			case KW_abs:
-				match(KW_abs);
+				name = match(KW_abs);
 				break;
 			case KW_log:
-				match(KW_log);
+				name = match(KW_log);
 				break;
 			case KW_cart_x:
-				match(KW_cart_x);
+				name = match(KW_cart_x);
 				break;
 			case KW_cart_y:
-				match(KW_cart_y);
+				name = match(KW_cart_y);
 				break;
 			case KW_polar_a:
-				match(KW_polar_a);
+				name = match(KW_polar_a);
 				break;
 			case KW_polar_r:
-				match(KW_polar_r);
+				name = match(KW_polar_r);
 				break;
 			case KW_int:
-				match(KW_int);
+				name =  match(KW_int);
 				break;
 			case KW_float:
-				match(KW_float);
+				name =  match(KW_float);
 				break;
 			case KW_width:
-				match(KW_width);
+				name =  match(KW_width);
 				break;
 			case KW_height:
-				match(KW_height);
+				name =  match(KW_height);
 				break;
 			default:
-				color();
+				name = color();
 		}
+		return name;
 	}
 
 
@@ -567,7 +671,7 @@ public class SimpleParser {
 	private Token consume() throws SyntaxException {
 		Token tmp = t;
 		if (isKind( EOF)) {
-			throw new SyntaxException(t,"Syntax Error while parsing Token=" + t.getText() + " " + t.line() + ":" + t.posInLine());
+			error();
 			//Note that EOF should be matched by the matchEOF method which is called only in parse().  
 			//Anywhere else is an error. */
 		}
