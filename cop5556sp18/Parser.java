@@ -320,8 +320,9 @@ public class Parser {
 				e1 = expression();
 				match(OP_COLON);
 				e2 = expression();
+				e0 = new ExpressionConditional(firstToken,e0,e1,e2);
 			}
-			return new ExpressionConditional(firstToken,e0,e1,e2);
+			return e0;
 		}
 
 //	OrExpression  ::=  AndExpression   (  |  AndExpression ) *
@@ -702,7 +703,6 @@ public class Parser {
 		t = scanner.nextToken();
 		return tmp;
 	}
-
 
 	/**
 	 * Only for check at end of program. Does not "consume" EOF so no attempt to get
