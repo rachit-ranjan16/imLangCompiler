@@ -106,9 +106,7 @@ public class Parser {
 				decsOrStatements.add(declaration());
 			}
 			else if (isKind(firstStatement)) {
-//				TODO Remove this
-				decsOrStatements.add(null);
-//				decsOrStatements.add(statement());
+				decsOrStatements.add(statement());
 			}
 			match(SEMI);
 		}
@@ -137,108 +135,131 @@ public class Parser {
 	Statement ::= StatementInput | StatementWrite | StatementAssignment
 		| StatementWhile | StatementIf | StatementShow | StatementSleep
 	 */
-	public void statement() throws SyntaxException{
+	public Statement statement() throws SyntaxException{
+		Statement s = null;
 		switch (t.getKind()) {
-
 			case KW_input:
-				statementInput();
+				s = statementInput();
 				break;
 			case KW_write:
-				statementWrite();
+				s = statementWrite();
 				break;
 			case KW_while:
-				statementWhile();
+				s = statementWhile();
 				break;
 			case KW_if:
-				statementIf();
+				s = statementIf();
 				break;
 			case KW_show:
-				statementShow();
+				s = statementShow();
 				break;
 			case KW_sleep:
-				statementSleep();
+				s = statementSleep();
 				break;
 			case IDENTIFIER:
 			case KW_red:
 			case KW_green:
 			case KW_blue:
 			case KW_alpha:
-				statementAssignment();
+				s = statementAssignment();
 				break;
 		}
+		return s;
 	}
 	// StatementAssignment ::=  LHS := Expression
-	public void statementAssignment() throws SyntaxException{
-
-		lhs();
+	public Statement statementAssignment() throws SyntaxException{
+		Token firstToken = t;
+		LHS l = lhs();
 		match(OP_ASSIGN);
-		expression();
+		Expression e = expression();
+		return new StatementAssign(firstToken, l, e);
 	}
 
 	// StatementSleep ::=  sleep Expression
-	public void statementSleep() throws SyntaxException{
+	public Statement statementSleep() throws SyntaxException{
+		Token firstToken = t;
 		match(KW_sleep);
-		expression();
+		Expression e = expression();
+		return new StatementSleep(firstToken, e);
 	}
 
 	// StatementShow ::=  show Expression
-	public void statementShow() throws SyntaxException{
+	public Statement statementShow() throws SyntaxException{
+		Token firstToken = t;
 		match(KW_show);
-		expression();
+		Expression e = expression();
+		return new StatementShow(firstToken, e);
 	}
 
 	// StatementIf ::=  if ( Expression ) Block
-	public void statementIf() throws SyntaxException{
+	public Statement statementIf() throws SyntaxException{
+		Token firstToken = t;
 		match(KW_if);
 		match(LPAREN);
-		expression();
+		Expression e = expression();
 		match(RPAREN);
-		block();
+		Block b = block();
+		return new StatementIf(firstToken, e, b);
 	}
 
 	// StatementWhile ::=  while (Expression ) Block
-	public void statementWhile() throws SyntaxException{
+	public Statement statementWhile() throws SyntaxException{
+		Token firstToken = t;
 		match(KW_while);
 		match(LPAREN);
-		expression();
+		Expression e = expression();
 		match(RPAREN);
-		block();
+		Block b = block();
+		return new StatementWhile(firstToken, e, b);
 	}
 
 	// StatementWrite ::= write IDENTIFIER to IDENTIFIER
-	public void statementWrite() throws SyntaxException {
+	public Statement statementWrite() throws SyntaxException {
+		Token firstToken = t;
 		match(KW_write);
-		match(IDENTIFIER);
+		Token source = match(IDENTIFIER);
 		match(KW_to);
-		match(IDENTIFIER);
+		Token dest = match(IDENTIFIER);
+		return new StatementWrite(firstToken,source,dest);
 	}
 
 	// StatementInput ::= input IDENTIFIER from @ Expression
-	public void statementInput() throws SyntaxException{
+	public Statement statementInput() throws SyntaxException{
+		Token firstToken = t;
 		match(KW_input);
-		match(IDENTIFIER);
+		Token name = match(IDENTIFIER);
 		match(KW_from);
 		match(OP_AT);
-		expression();
+		Expression e = expression();
+		return new StatementInput(firstToken, name, e);
 	}
 
 
 	//	LHS ::=  IDENTIFIER | IDENTIFIER PixelSelector | Color ( IDENTIFIER PixelSelector
-	public void lhs() throws SyntaxException{
-			if (t.getKind() == IDENTIFIER) {
-				match(IDENTIFIER);
-				if (isKind(firstPixelSelector))
-					pixelSelector();
-			} else if (isKind(firstColor)) {
-				color();
-				match(LPAREN);
-				match(IDENTIFIER);
-				pixelSelector();
-				match(RPAREN);
-
+	public LHS lhs() throws SyntaxException {
+		Token firstToken = t;
+		LHS l = null;
+		if (t.getKind() == IDENTIFIER) {
+			if(scanner.peek().getKind() == LSQUARE) {
+				Token name = match(IDENTIFIER);
+				PixelSelector ps = pixelSelector();
+				l = new LHSPixel(firstToken, name, ps);
 			}
-			else error();
+			else {
+				Token name = match(IDENTIFIER);
+				l = new LHSIdent(firstToken, name);
+			}
+		} else if (isKind(firstColor)) {
+			Token color = color();
+			match(LPAREN);
+			Token name = match(IDENTIFIER);
+			PixelSelector ps =  pixelSelector();
+			match(RPAREN);
+			l = new LHSSample(firstToken, name, ps, color);
 		}
+		else error();
+		return l;
+	}
 
 
 //	Color ::= red | green | blue | alpha
@@ -566,8 +587,11 @@ public class Parser {
 				e0 = new ExpressionFloatLiteral(firstToken, lit);
 				break;
 			case IDENTIFIER:
-				if(isKind(firstPixelExpression))
+				if(scanner.peek().getKind() == LSQUARE) {
 					e0 = pixelExpression();
+				}
+				else
+					e0 = new ExpressionIdent(firstToken, match(IDENTIFIER));
 				break;
 			case LPAREN:
 				match(LPAREN);
