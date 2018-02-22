@@ -146,22 +146,67 @@ public class ParserTest {
 	 * @throws SyntaxException
 	 */
 	
-//	@Test
-//	public void testExpression() throws LexicalException, SyntaxException {
-//		String input = "x + 2";
-//		Parser parser = makeParser(input);
-//		Expression e = parser.expression();  //call expression here instead of parse
-//		show(e);
-//		assertEquals(ExpressionBinary.class, e.getClass());
-//		ExpressionBinary b = (ExpressionBinary)e;
-//		assertEquals(ExpressionIdent.class, b.leftExpression.getClass());
-//		ExpressionIdent left = (ExpressionIdent)b.leftExpression;
-//		assertEquals("x", left.name);
-//		assertEquals(ExpressionIntegerLiteral.class, b.rightExpression.getClass());
-//		ExpressionIntegerLiteral right = (ExpressionIntegerLiteral)b.rightExpression;
-//		assertEquals(2, right.value);
-//		assertEquals(OP_PLUS, b.op);
-//	}
+	@Test
+	public void testExpression() throws LexicalException, SyntaxException {
+		String input = "x + 2";
+		Parser parser = makeParser(input);
+		Expression e = parser.expression();  //call expression here instead of parse
+		show(e);
+		assertEquals(ExpressionBinary.class, e.getClass());
+		ExpressionBinary b = (ExpressionBinary)e;
+		assertEquals(ExpressionIdent.class, b.leftExpression.getClass());
+		ExpressionIdent left = (ExpressionIdent)b.leftExpression;
+		assertEquals("x", left.name);
+		assertEquals(ExpressionIntegerLiteral.class, b.rightExpression.getClass());
+		ExpressionIntegerLiteral right = (ExpressionIntegerLiteral)b.rightExpression;
+		assertEquals(2, right.value);
+		assertEquals(OP_PLUS, b.op);
+	}
+
+	@Test
+	public void testValidProgram() throws LexicalException, SyntaxException {
+		String input = "sample{" +
+					"image img;" +
+					"input img from @0;" +
+					"show img;" +
+					"sleep(4000);" +
+					"image img2[width(img),height(img)];" +
+					"int x;" +
+					"x := 0;" +
+					"while(x<width(img2)) {" +
+						"int y;" +
+						"y := 0;" +
+						"while( y < height(img2)) {" +
+							"blue(img2[x,y]) := red(img[x,y]);" +
+							"green(img2[x,y]) := blue(img[x,y]);" +
+							"red(img2[x,y]) := green(img[x,y]);" +
+							"alpha(img2[x,y]) := Z;" +
+							"y := y + 1;" +
+						"};" +
+						"x:= x + 1;" +
+					"};" +
+					"show img2;" +
+					"sleep(4000);" +
+				"}";
+		Parser parser = makeParser(input);
+		Program p = parser.parse();
+		assertEquals(p.progName, "sample");
+		assertEquals(p.block.decsOrStatements.size(), 10);
+		assertEquals(p.block.decsOrStatements.get(4).firstToken.getKind(), IDENTIFIER);
+		System.out.println("Done");
+	}
+
+	@Test
+	public void testImageExpressionDeclaration() throws LexicalException, SyntaxException {
+		String inp;
+		Parser parser;
+		inp = "falsed { \n image img /* Some Comment */ [ 256, 256 ];\n}";
+		parser = makeParser(inp);
+		parser.parse();
+		inp = "falsed { \n image img /* Some Comment */ [ a+e, b+c ];\n}";
+		parser = makeParser(inp);
+		parser.parse();
+	}
 
 }
 	
