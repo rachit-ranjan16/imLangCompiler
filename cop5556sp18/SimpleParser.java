@@ -463,9 +463,10 @@ public class SimpleParser {
 				match(FLOAT_LITERAL);
 				break;
 			case IDENTIFIER:
-				match(IDENTIFIER);
-				if(isKind(firstPixelSelector))
-					pixelSelector();
+				if(scanner.peek().getKind() == LSQUARE) {
+					pixelExpression();
+				}
+				else match(IDENTIFIER);
 				break;
 			case LPAREN:
 				match(LPAREN);
