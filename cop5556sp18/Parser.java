@@ -511,6 +511,7 @@ public class Parser {
 
 //	FunctionApplication ::= FunctionName ( Expression )  | FunctionName  [ Expression , Expression ]
 //	ExpressionFunctionAppWithPixel ::= FunctionName Expression Expression
+//	ExpressionFunctionAppWithExpressionArg ::=  FunctionName Expression
 	public Expression functionApplication() throws SyntaxException{
 		Token firstToken = t;
 		Token functionName = functionName();
@@ -530,7 +531,10 @@ public class Parser {
 				match(RSQUARE);
 				break;
 		}
-		return new ExpressionFunctionAppWithPixel(firstToken, functionName, e0, e1);
+		if (e1 == null)
+			return new ExpressionFunctionAppWithExpressionArg(firstToken, functionName, e0);
+		else
+			return new ExpressionFunctionAppWithPixel(firstToken, functionName, e0, e1);
 	}
 
 //	PredefinedName ::= Z | default_height | default_width
