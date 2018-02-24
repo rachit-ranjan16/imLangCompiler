@@ -196,17 +196,6 @@ public class ParserTest {
 		System.out.println("Done");
 	}
 
-	@Test
-	public void testImageExpressionDeclaration() throws LexicalException, SyntaxException {
-		String inp;
-		Parser parser;
-		inp = "falsed { \n image img /* Some Comment */ [ 256, 256 ];\n}";
-		parser = makeParser(inp);
-		parser.parse();
-		inp = "falsed { \n image img /* Some Comment */ [ a+e, b+c ];\n}";
-		parser = makeParser(inp);
-		parser.parse();
-	}
 
 }
 	
