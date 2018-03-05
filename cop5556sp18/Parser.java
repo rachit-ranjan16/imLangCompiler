@@ -530,6 +530,7 @@ public class Parser {
 				e1 = expression();
 				match(RSQUARE);
 				break;
+			default: error();
 		}
 		if (e1 == null)
 			return new ExpressionFunctionAppWithExpressionArg(firstToken, functionName, e0);

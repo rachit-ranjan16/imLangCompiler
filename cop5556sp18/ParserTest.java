@@ -17,6 +17,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import cop5556sp18.AST.*;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -24,24 +25,6 @@ import org.junit.rules.ExpectedException;
 import cop5556sp18.Scanner.Kind;
 import cop5556sp18.Parser;
 import cop5556sp18.Scanner;
-import cop5556sp18.AST.ASTNode;
-import cop5556sp18.AST.Block;
-import cop5556sp18.AST.Declaration;
-import cop5556sp18.AST.Expression;
-import cop5556sp18.AST.ExpressionBinary;
-import cop5556sp18.AST.ExpressionIdent;
-import cop5556sp18.AST.ExpressionIntegerLiteral;
-import cop5556sp18.AST.StatementInput;
-import cop5556sp18.AST.StatementShow;
-import cop5556sp18.AST.LHS;
-import cop5556sp18.AST.LHSIdent;
-import cop5556sp18.AST.LHSPixel;
-import cop5556sp18.AST.LHSSample;
-import cop5556sp18.AST.PixelSelector;
-import cop5556sp18.AST.Program;
-import cop5556sp18.AST.Statement;
-import cop5556sp18.AST.StatementAssign;
-import cop5556sp18.AST.StatementWrite;
 import cop5556sp18.Parser.SyntaxException;
 import cop5556sp18.Scanner.LexicalException;
 import cop5556sp18.Scanner.Token;
@@ -161,6 +144,20 @@ public class ParserTest {
 		ExpressionIntegerLiteral right = (ExpressionIntegerLiteral)b.rightExpression;
 		assertEquals(2, right.value);
 		assertEquals(OP_PLUS, b.op);
+	}
+
+	@Test
+	public void testFailedCase() throws LexicalException, SyntaxException {
+		String input = "sin x";
+		thrown.expect(SyntaxException.class);
+		Parser parser = makeParser(input);
+		try {
+			parser.expression();  //call expression here instead of parse
+		}
+		catch (Exception ex) {
+			ex.printStackTrace();
+			throw ex;
+		}
 	}
 
 	@Test
