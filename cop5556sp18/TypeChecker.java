@@ -57,17 +57,14 @@ public class TypeChecker implements ASTVisitor {
 		if(!symbolTable.insert(declaration.name, declaration))
 			error(declaration.firstToken);
 
-		if(declaration.width != null && declaration.height != null) {
-		}
-		else if(declaration.height != null || declaration.width != null) {
-			if(Types.getType(declaration.type) != Type.IMAGE) error(declaration.firstToken);
-			if(declaration.width != null) {
+		if(declaration.height != null || declaration.width != null) {
+			if (Types.getType(declaration.type) != Type.IMAGE) error(declaration.firstToken);
+			if (declaration.width != null) {
 				declaration.width.visit(this, arg);
-				if(declaration.width.type != Type.INTEGER) error(declaration.firstToken);
-			}
-			else if(declaration.height !=null) {
+				if (declaration.width.type != Type.INTEGER) error(declaration.firstToken);
+			} else if (declaration.height != null) {
 				declaration.height.visit(this, arg);
-				if(declaration.height.type != Type.INTEGER) error(declaration.firstToken);
+				if (declaration.height.type != Type.INTEGER) error(declaration.firstToken);
 			}
 		}
 
