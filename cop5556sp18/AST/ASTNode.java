@@ -14,6 +14,7 @@ package cop5556sp18.AST;
  */
 
 import cop5556sp18.Scanner.Token;
+import cop5556sp18.Types;
 
 public abstract class ASTNode {
 
@@ -23,7 +24,6 @@ public abstract class ASTNode {
 		super();
 		this.firstToken = firstToken;
 	}
-
 	public abstract Object visit(ASTVisitor v, Object arg) throws Exception;
 
 	@Override
