@@ -59,6 +59,7 @@ public class TypeChecker implements ASTVisitor {
 				if (declaration.height.type != Type.INTEGER) error(declaration.firstToken);
 			}
 		}
+		if((declaration.width == null) != (declaration.height == null)) error(declaration.firstToken);
 		return null;
 	}
 
