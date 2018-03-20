@@ -34,7 +34,6 @@ public class TypeChecker implements ASTVisitor {
 
 	@Override
 	public Object visitBlock(Block block, Object arg) throws Exception {
-
 		symbolTable.enterScope();
 		for(ASTNode n: block.decsOrStatements) {
 			if(n instanceof Declaration || n instanceof Statement)
@@ -46,17 +45,10 @@ public class TypeChecker implements ASTVisitor {
 	return null;
 	}
 
-//	Declaration.name ← IDENTIFIER.name
-//	Declaration.name  SymbolTable.currentScope
-//	Expression0 == ε   or  (Expression0.type == integer and type == image)
-//	Expression1 == ε   or   Expression1.type == integer and type == image)
-//			(Expression0 == ε) == (Expression1 == ε)
-//	SymbolTable ←  SymbolTable ∪  (name, Declaration)
 	@Override
 	public Object visitDeclaration(Declaration declaration, Object arg) throws Exception {
 		if(!symbolTable.insert(declaration.name, declaration))
 			error(declaration.firstToken);
-
 		if(declaration.height != null || declaration.width != null) {
 			if (Types.getType(declaration.type) != Type.IMAGE) error(declaration.firstToken);
 			if (declaration.width != null) {
@@ -67,7 +59,6 @@ public class TypeChecker implements ASTVisitor {
 				if (declaration.height.type != Type.INTEGER) error(declaration.firstToken);
 			}
 		}
-
 		return null;
 	}
 
@@ -171,7 +162,6 @@ public class TypeChecker implements ASTVisitor {
 				default:
 					return Type.NONE;
 			}
-
 		else if((l.type == Type.BOOLEAN && r.type == Type.INTEGER) ||
 				(l.type == Type.INTEGER && r.type == Type.BOOLEAN))
 			switch(op) {
@@ -309,11 +299,14 @@ public class TypeChecker implements ASTVisitor {
 	@Override
 	public Object visitExpressionPixelConstructor(ExpressionPixelConstructor expressionPixelConstructor, Object arg)
 			throws Exception {
-//		TODO Decide if visiting color expressions is needed
-		expressionPixelConstructor.alpha.type = Type.INTEGER;
-		expressionPixelConstructor.red.type = Type.INTEGER;
-		expressionPixelConstructor.green.type = Type.INTEGER;
-		expressionPixelConstructor.blue.type = Type.INTEGER;
+		expressionPixelConstructor.alpha.visit(this, arg);
+		if(expressionPixelConstructor.alpha.type != Type.INTEGER) error(expressionPixelConstructor.firstToken);
+		expressionPixelConstructor.red.visit(this, arg);
+		if(expressionPixelConstructor.red.type != Type.INTEGER) error(expressionPixelConstructor.firstToken);
+		expressionPixelConstructor.green.visit(this, arg);
+		if(expressionPixelConstructor.green.type != Type.INTEGER) error(expressionPixelConstructor.firstToken);
+		expressionPixelConstructor.blue.visit(this, arg);
+		if(expressionPixelConstructor.red.type != Type.INTEGER) error(expressionPixelConstructor.firstToken);
 		expressionPixelConstructor.type = Type.INTEGER;
 		return null;
 	}

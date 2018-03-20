@@ -27,12 +27,26 @@ public class SymbolTable {
         int endScope = scopeStack.pop();
         currentScope = scopeStack.peek();
         List<String> delKeyList = new ArrayList<>();
-        for (String key : symTab.keySet())
-            for (Pair p : symTab.get(key))
-                if (p.getScope() == endScope)
+        List<Integer> delPairList = new ArrayList<>();
+        for (String key : symTab.keySet()) {
+            delPairList.clear();
+            List<Pair> pairList = symTab.get(key);
+            for (Pair p : pairList)
+                if (p.getScope() == endScope) {
+                    //Mark element in ArrayList of Pairs for Deletion
+                    delPairList.add(pairList.indexOf(p));
+                    // Mark the key in Symbol Table for deletion check
                     delKeyList.add(key);
-        for(String key: delKeyList)
-            symTab.remove(key);
+                }
+            //Remove all the marked for deletion objects from the ArrayList of Pairs
+            for (Integer delIndex : delPairList)
+                pairList.remove(delIndex);
+        }
+        //Remove Key from the Symbol Table if and only if the value ArrayList Pair is empty
+        for (String key : delKeyList)
+            if (symTab.get(key).size() == 0)
+                symTab.remove(key);
+
     }
 
     public boolean insert(String identifier, Declaration dec) {
