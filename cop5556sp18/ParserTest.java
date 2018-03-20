@@ -14,20 +14,14 @@
 package cop5556sp18;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
-import cop5556sp18.AST.*;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+import cop5556sp18.AST.*;
 import cop5556sp18.Scanner.Kind;
-import cop5556sp18.Parser;
-import cop5556sp18.Scanner;
 import cop5556sp18.Parser.SyntaxException;
 import cop5556sp18.Scanner.LexicalException;
-import cop5556sp18.Scanner.Token;
 import static cop5556sp18.Scanner.Kind.*;
 
 public class ParserTest {

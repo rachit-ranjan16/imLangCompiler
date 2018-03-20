@@ -20,5 +20,5 @@ public abstract class Statement extends ASTNode {
 	public Statement(Token firstToken) {
 		super(firstToken);
 	}
-
+	public Declaration dec;
 }
