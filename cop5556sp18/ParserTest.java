@@ -142,7 +142,7 @@ public class ParserTest {
 
 	@Test
 	public void testFailedCase() throws LexicalException, SyntaxException {
-		String input = "prog{int var1[500, 1];}";
+		String input = "sin x";
 		thrown.expect(SyntaxException.class);
 		Parser parser = makeParser(input);
 		try {
@@ -154,6 +154,19 @@ public class ParserTest {
 		}
 	}
 
+	@Test
+	public void testAnotherFailedCase() throws LexicalException, SyntaxException {
+		String input = "prog{int var1[500, 1];}";
+		thrown.expect(SyntaxException.class);
+		Parser parser = makeParser(input);
+		try {
+			Program p = parser.parse();  //call expression here instead of parse
+		}
+		catch (Exception ex) {
+			ex.printStackTrace();
+			throw ex;
+		}
+	}
 	@Test
 	public void testValidProgram() throws LexicalException, SyntaxException {
 		String input = "sample{" +
