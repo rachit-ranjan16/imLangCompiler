@@ -142,7 +142,7 @@ public class ParserTest {
 
 	@Test
 	public void testFailedCase() throws LexicalException, SyntaxException {
-		String input = "sin x";
+		String input = "prog{int var1[500, 1];}";
 		thrown.expect(SyntaxException.class);
 		Parser parser = makeParser(input);
 		try {
