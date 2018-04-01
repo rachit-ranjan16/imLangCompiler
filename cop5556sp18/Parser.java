@@ -121,6 +121,7 @@ public class Parser {
 			Expression e1 = null;
 			Token ty = type();
 			Token firstToken = match(IDENTIFIER);
+			if(ty.getKind()!= KW_image && t.getKind() == LSQUARE) error();
 			if (t.getKind() == LSQUARE) {
 				match(LSQUARE);
 				e0 = expression();

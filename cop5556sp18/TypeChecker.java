@@ -49,17 +49,19 @@ public class TypeChecker implements ASTVisitor {
 	public Object visitDeclaration(Declaration declaration, Object arg) throws Exception {
 		if(!symbolTable.insert(declaration.name, declaration))
 			error(declaration.firstToken);
+		if((declaration.width == null) != (declaration.height == null)) error(declaration.firstToken);
 		if(declaration.height != null || declaration.width != null) {
 			if (Types.getType(declaration.type) != Type.IMAGE) error(declaration.firstToken);
 			if (declaration.width != null) {
 				declaration.width.visit(this, arg);
 				if (declaration.width.type != Type.INTEGER) error(declaration.firstToken);
-			} else if (declaration.height != null) {
+//			} else if (declaration.height != null) {
+			} if (declaration.height != null) {
 				declaration.height.visit(this, arg);
 				if (declaration.height.type != Type.INTEGER) error(declaration.firstToken);
 			}
 		}
-		if((declaration.width == null) != (declaration.height == null)) error(declaration.firstToken);
+
 		return null;
 	}
 
@@ -163,15 +165,6 @@ public class TypeChecker implements ASTVisitor {
 				default:
 					return Type.NONE;
 			}
-		else if((l.type == Type.BOOLEAN && r.type == Type.INTEGER) ||
-				(l.type == Type.INTEGER && r.type == Type.BOOLEAN))
-			switch(op) {
-				case OP_AND:
-				case OP_OR:
-					return Type.BOOLEAN;
-				default:
-					return Type.NONE;
-			}
 		else if(l.type == Type.BOOLEAN && r.type == Type.BOOLEAN)
 			switch(op) {
 				case OP_EQ:
@@ -180,6 +173,8 @@ public class TypeChecker implements ASTVisitor {
 				case OP_GE:
 				case OP_LT:
 				case OP_LE:
+				case OP_AND:
+				case OP_OR:
 					return Type.BOOLEAN;
 				default:
 					return Type.NONE;
