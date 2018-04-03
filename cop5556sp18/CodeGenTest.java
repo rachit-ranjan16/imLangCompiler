@@ -216,4 +216,59 @@ public class CodeGenTest {
 		show("Log:\n"+RuntimeLog.globalLog);
 		assertEquals("entering main;false;leaving main;",RuntimeLog.globalLog.toString());
 	}
+
+	@Test
+	public void testExpressionBinaryIntegerSum() throws Exception {
+		String prog = "intSum";
+		String input = prog + "{show 2+3;} ";
+		byte[] bytecode = genCode(input);
+		String[] commandLineArgs = {}; //create command line argument array to initialize params, none in this case
+		runCode(prog, bytecode, commandLineArgs);
+		show("Log:\n"+RuntimeLog.globalLog);
+		assertEquals("entering main;5;leaving main;",RuntimeLog.globalLog.toString());
+	}
+
+	@Test
+	public void testExpressionBinaryIntegerPower() throws Exception {
+		String prog = "intSum";
+		String input = prog + "{show 2**3;} ";
+		byte[] bytecode = genCode(input);
+		String[] commandLineArgs = {}; //create command line argument array to initialize params, none in this case
+		runCode(prog, bytecode, commandLineArgs);
+		show("Log:\n"+RuntimeLog.globalLog);
+		assertEquals("entering main;8;leaving main;",RuntimeLog.globalLog.toString());
+	}
+
+	@Test
+	public void testExpressionBinaryIntFloatPower() throws Exception {
+		String prog = "intSum";
+		String input = prog + "{show 2**3.0;} ";
+		byte[] bytecode = genCode(input);
+		String[] commandLineArgs = {}; //create command line argument array to initialize params, none in this case
+		runCode(prog, bytecode, commandLineArgs);
+		show("Log:\n"+RuntimeLog.globalLog);
+		assertEquals("entering main;8.0;leaving main;",RuntimeLog.globalLog.toString());
+	}
+
+	@Test
+	public void testExpressionUnaryIntegerNegate() throws Exception {
+		String prog = "intSum";
+		String input = prog + "{show !10;} ";
+		byte[] bytecode = genCode(input);
+		String[] commandLineArgs = {}; //create command line argument array to initialize params, none in this case
+		runCode(prog, bytecode, commandLineArgs);
+		show("Log:\n"+RuntimeLog.globalLog);
+		assertEquals("entering main;-11;leaving main;",RuntimeLog.globalLog.toString());
+	}
+
+	@Test
+	public void testExpressionUnaryBooleanNegate() throws Exception {
+		String prog = "intSum";
+		String input = prog + "{show !true;} ";
+		byte[] bytecode = genCode(input);
+		String[] commandLineArgs = {}; //create command line argument array to initialize params, none in this case
+		runCode(prog, bytecode, commandLineArgs);
+		show("Log:\n"+RuntimeLog.globalLog);
+		assertEquals("entering main;false;leaving main;",RuntimeLog.globalLog.toString());
+	}
 }

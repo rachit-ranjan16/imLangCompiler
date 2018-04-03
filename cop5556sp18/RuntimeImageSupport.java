@@ -114,6 +114,16 @@ public class RuntimeImageSupport {
 		}
 		return image;
 	}
+	public static BufferedImage readImage(String source) {
+		BufferedImage image;
+		try {
+			URL url = new URL(source);
+			image = readFromURL(url);
+		} catch (MalformedURLException e) {// wasn't a URL, maybe it is a file
+			image = readFromFile(source);
+		}
+		return image;
+	}
 	//
 	//
 	//
