@@ -1,24 +1,9 @@
-/**
- * 
- * Class contains methods to manipulate and display images. It is part of the runtime support
- * for our language.
- * 
- * This code is used in the class project in COP5556 Programming Language Principles 
- * at the University of Florida, Spring 2018.
- * 
- * This software is solely for the educational benefit of students 
- * enrolled in the course during the Spring 2018 semester.  
- * 
- * This software, and any software derived from it,  may not be shared with others or posted to public web sites,
- * either during the course or afterwards.
- * 
- *  @Beverly A. Sanders, 2018
- */
 
 package cop5556sp18;
 
 import static javax.swing.JFrame.EXIT_ON_CLOSE;
 
+import java.awt.Graphics2D;
 import java.awt.geom.AffineTransform;
 import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
@@ -50,6 +35,7 @@ public class RuntimeImageSupport {
 		File f = new File(filename);
 		BufferedImage bi;
 		try {
+			System.out.println("reading image from file " + filename);
 			bi = ImageIO.read(f);
 		} catch (IOException e) {
 			throw new RuntimeException(e.getMessage() + " " + filename, e);
@@ -72,7 +58,7 @@ public class RuntimeImageSupport {
 	}
 
 	public static BufferedImage resize(BufferedImage before, int maxX,
-			int maxY) {
+									   int maxY) {
 		int w = before.getWidth();
 		int h = before.getHeight();
 		AffineTransform at = new AffineTransform();
@@ -89,10 +75,10 @@ public class RuntimeImageSupport {
 	/**
 	 * Reads the image from the indicated URL or filename. I If the given source
 	 * is not a valid URL, it assumes it is a file.
-	 * 
+	 *
 	 * If X and Y are not null, the image is resized to this width and height.
 	 * If they are null, the image stays its original size.
-	 * 
+	 *
 	 * @param source
 	 *            String with source or filename on local filesystem.
 	 * @param X
@@ -110,19 +96,13 @@ public class RuntimeImageSupport {
 			image = readFromFile(source);
 		}
 		if (X != null) {
-			return resize(image, X, Y);
+			image = resize(image, X, Y);
 		}
-		return image;
-	}
-	public static BufferedImage readImage(String source) {
-		BufferedImage image;
-		try {
-			URL url = new URL(source);
-			image = readFromURL(url);
-		} catch (MalformedURLException e) {// wasn't a URL, maybe it is a file
-			image = readFromFile(source);
-		}
-		return image;
+		BufferedImage newImage = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_ARGB);
+		Graphics2D g = newImage.createGraphics();
+		g.drawImage(image, 0, 0, image.getWidth(), image.getHeight(), null);
+		g.dispose();
+		return newImage;
 	}
 	//
 	//
@@ -136,7 +116,7 @@ public class RuntimeImageSupport {
 	/**
 	 * Writes the given image to a file on the local system indicated by the
 	 * given filename.
-	 * 
+	 *
 	 * @param image
 	 * @param filename
 	 */
@@ -145,7 +125,7 @@ public class RuntimeImageSupport {
 		try {
 			System.out.println("writing image to file " + filename
 					+ "(in File.toString) " + f);
-			ImageIO.write(image, "jpeg", f);
+			ImageIO.write(image, "png", f);
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
@@ -154,9 +134,9 @@ public class RuntimeImageSupport {
 	public final static String readFromURLSig = "(Ljava/net/URL;)" + ImageDesc;
 	/**
 	 * Read and returns the image at the given URL
-	 * 
+	 *
 	 * Throws RuntimeException if this fails
-	 * 
+	 *
 	 * @param url
 	 * @return BufferedImage representing the indicated image
 	 */
@@ -173,7 +153,7 @@ public class RuntimeImageSupport {
 	/**
 	 * Returns the indicated pixel with the alpha component masked to 0. If the
 	 * given x and y is out of bounds, return 0.
-	 * 
+	 *
 	 * @param image
 	 * @param x
 	 * @param y
@@ -189,8 +169,8 @@ public class RuntimeImageSupport {
 	/**
 	 * Inserts the given pixel into the image at the indicated location. If x or
 	 * y are out of bounds, do nothing.
-	 * 
-	 * @param argb
+	 *
+	 * @param rgb
 	 * @param image
 	 * @param x
 	 * @param y
@@ -207,7 +187,7 @@ public class RuntimeImageSupport {
 
 	public static String updatePixelColorSig = "(I" + ImageDesc + "III)V";
 	public final static void updatePixelColor(int sampleVal,
-			BufferedImage image, int x, int y, int color) {
+											  BufferedImage image, int x, int y, int color) {
 		if (x < 0 || x >= image.getWidth() || y < 0 || y >= image.getHeight()) {
 			System.out.println("pixel out of bounds");
 			return;
@@ -220,7 +200,7 @@ public class RuntimeImageSupport {
 	public final static String getWidthSig = "(" + ImageDesc + ")I";
 	/**
 	 * Returns the width of the given image.
-	 * 
+	 *
 	 * @param image
 	 * @return
 	 */
@@ -232,7 +212,7 @@ public class RuntimeImageSupport {
 
 	/**
 	 * Returns the height of the given image.
-	 * 
+	 *
 	 * @param image
 	 * @return
 	 */
@@ -243,7 +223,7 @@ public class RuntimeImageSupport {
 	public static String makeFrameSig = "(" + ImageDesc + ")" + JFrameDesc;
 	/**
 	 * Creates and shows a JFrame displaying the given image.
-	 * 
+	 *
 	 * @param image
 	 *            The image to display
 	 * @return The new JFrame

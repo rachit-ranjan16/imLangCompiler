@@ -47,9 +47,7 @@ public class CodeGenerator implements ASTVisitor, Opcodes {
 
 	final Integer defaultWidth;
 	final Integer defaultHeight;
-//	static int slot = 0;
 	int slot;
-	// final boolean itf = false;
 	/**
 	 * @param DEVEL
 	 *            used as parameter to genPrint and genPrintTOS
@@ -141,8 +139,10 @@ public class CodeGenerator implements ASTVisitor, Opcodes {
 			Object arg) throws Exception {
 		expressionBinary.leftExpression.visit(this, arg);
 		expressionBinary.rightExpression.visit(this, arg);
-		if(expressionBinary.leftExpression.getType() == Type.INTEGER &&
-				expressionBinary.rightExpression.getType() == Type.INTEGER)
+		if (expressionBinary.leftExpression.getType() == Type.INTEGER &&
+				expressionBinary.rightExpression.getType() == Type.INTEGER) {
+			Label startSetTrue = new Label();
+			Label endSetTrue = new Label();
 			switch (expressionBinary.op) {
 				case OP_PLUS:
 					mv.visitInsn(Opcodes.IADD);
@@ -173,9 +173,40 @@ public class CodeGenerator implements ASTVisitor, Opcodes {
 					break;
 				case OP_OR:
 					mv.visitInsn(Opcodes.IOR);
+					break;
+				case OP_LT:
+					mv.visitJumpInsn(IF_ICMPLT, startSetTrue);
+					mv.visitLdcInsn(false);
+					break;
+				case OP_LE:
+					mv.visitJumpInsn(IF_ICMPLE, startSetTrue);
+					mv.visitLdcInsn(false);
+					break;
+				case OP_GT:
+					mv.visitJumpInsn(IF_ICMPGT, startSetTrue);
+					mv.visitLdcInsn(false);
+					break;
+				case OP_GE:
+					mv.visitJumpInsn(IF_ICMPGE, startSetTrue);
+					mv.visitLdcInsn(false);
+					break;
+				case OP_EQ:
+					mv.visitJumpInsn(IF_ICMPEQ, startSetTrue);
+					mv.visitLdcInsn(false);
+					break;
+				case OP_NEQ:
+					mv.visitJumpInsn(IF_ICMPNE, startSetTrue);
+					mv.visitLdcInsn(false);
+					break;
 			}
-		else if(expressionBinary.leftExpression.getType() == Type.FLOAT &&
-				expressionBinary.rightExpression.getType() == Type.FLOAT)
+			mv.visitJumpInsn(GOTO, endSetTrue);
+			mv.visitLabel(startSetTrue);
+			mv.visitLdcInsn(true);
+			mv.visitLabel(endSetTrue);
+		} else if (expressionBinary.leftExpression.getType() == Type.FLOAT &&
+				expressionBinary.rightExpression.getType() == Type.FLOAT) {
+			Label startSetTrue = new Label();
+			Label endSetTrue = new Label();
 			switch (expressionBinary.op) {
 				case OP_PLUS:
 					mv.visitInsn(Opcodes.FADD);
@@ -195,14 +226,53 @@ public class CodeGenerator implements ASTVisitor, Opcodes {
 					mv.visitInsn(Opcodes.F2D);
 					expressionBinary.rightExpression.visit(this, arg);
 					mv.visitInsn(Opcodes.F2D);
-					mv.visitMethodInsn(Opcodes.INVOKESTATIC, "java/lang/Math","pow", "(DD)D", false);
+					mv.visitMethodInsn(Opcodes.INVOKESTATIC, "java/lang/Math", "pow", "(DD)D", false);
 					mv.visitInsn(Opcodes.D2F);
 					break;
+				case OP_GE:
+					//TODO Fix This
+					mv.visitInsn(FCMPG);
+					mv.visitJumpInsn(IFGE, startSetTrue);
+					mv.visitLdcInsn(false);
+					break;
+				case OP_LE:
+					//TODO Fix This
+					mv.visitInsn(FCMPG);
+					// 1 <
+					// 0 ==
+					mv.visitJumpInsn(IFLE, startSetTrue);
+					mv.visitLdcInsn(false);
+					break;
+				case OP_GT:
+					mv.visitInsn(FCMPG);
+					mv.visitJumpInsn(IFGT, startSetTrue);
+					mv.visitLdcInsn(false);
+					break;
+				case OP_LT:
+					mv.visitInsn(FCMPG);
+					mv.visitJumpInsn(IFLT, startSetTrue);
+					mv.visitLdcInsn(false);
+					break;
+				case OP_EQ:
+					mv.visitInsn(FCMPG);
+					mv.visitJumpInsn(IFEQ, startSetTrue);
+					mv.visitLdcInsn(false);
+					break;
+				case OP_NEQ:
+					mv.visitInsn(FCMPG);
+					mv.visitJumpInsn(IFNE, startSetTrue);
+					mv.visitLdcInsn(false);
+					break;
 			}
-		else if((expressionBinary.leftExpression.getType() == Type.INTEGER &&
+			mv.visitJumpInsn(GOTO, endSetTrue);
+			mv.visitLabel(startSetTrue);
+			mv.visitLdcInsn(true);
+			mv.visitLabel(endSetTrue);
+		}
+		else if ((expressionBinary.leftExpression.getType() == Type.INTEGER &&
 				expressionBinary.rightExpression.getType() == Type.FLOAT) ||
 				(expressionBinary.leftExpression.getType() == Type.FLOAT &&
-				expressionBinary.rightExpression.getType() == Type.INTEGER)) {
+						expressionBinary.rightExpression.getType() == Type.INTEGER)) {
 
 			mv.visitInsn(Opcodes.POP2);
 			expressionBinary.leftExpression.visit(this, arg);
@@ -227,7 +297,7 @@ public class CodeGenerator implements ASTVisitor, Opcodes {
 				case OP_POWER:
 					mv.visitInsn(Opcodes.POP2);
 					expressionBinary.leftExpression.visit(this, arg);
-					switch(expressionBinary.leftExpression.getType()) {
+					switch (expressionBinary.leftExpression.getType()) {
 						case INTEGER:
 							mv.visitInsn(Opcodes.I2D);
 							break;
@@ -242,13 +312,14 @@ public class CodeGenerator implements ASTVisitor, Opcodes {
 						case FLOAT:
 							mv.visitInsn(Opcodes.F2D);
 					}
-					mv.visitMethodInsn(Opcodes.INVOKESTATIC, "java/lang/Math","pow", "(DD)D", false);
+					mv.visitMethodInsn(Opcodes.INVOKESTATIC, "java/lang/Math", "pow", "(DD)D", false);
 					mv.visitInsn(Opcodes.D2F);
 					break;
 			}
-		}
-		else if(expressionBinary.leftExpression.getType() == Type.BOOLEAN &&
-				expressionBinary.rightExpression.getType() == Type.BOOLEAN)
+		} else if (expressionBinary.leftExpression.getType() == Type.BOOLEAN &&
+				expressionBinary.rightExpression.getType() == Type.BOOLEAN) {
+			Label startSetTrue = new Label();
+			Label endSetTrue = new Label();
 			switch (expressionBinary.op) {
 				case OP_AND:
 					mv.visitInsn(Opcodes.IAND);
@@ -256,7 +327,36 @@ public class CodeGenerator implements ASTVisitor, Opcodes {
 				case OP_OR:
 					mv.visitInsn(Opcodes.IOR);
 					break;
+				case OP_LT:
+					mv.visitJumpInsn(IF_ICMPLT, startSetTrue);
+					mv.visitLdcInsn(false);
+					break;
+				case OP_LE:
+					mv.visitJumpInsn(IF_ICMPLE, startSetTrue);
+					mv.visitLdcInsn(false);
+					break;
+				case OP_GT:
+					mv.visitJumpInsn(IF_ICMPGT, startSetTrue);
+					mv.visitLdcInsn(false);
+					break;
+				case OP_GE:
+					mv.visitJumpInsn(IF_ICMPGE, startSetTrue);
+					mv.visitLdcInsn(false);
+					break;
+				case OP_EQ:
+					mv.visitJumpInsn(IF_ICMPEQ, startSetTrue);
+					mv.visitLdcInsn(false);
+					break;
+				case OP_NEQ:
+					mv.visitJumpInsn(IF_ICMPNE, startSetTrue);
+					mv.visitLdcInsn(false);
+					break;
 			}
+			mv.visitJumpInsn(GOTO, endSetTrue);
+			mv.visitLabel(startSetTrue);
+			mv.visitLdcInsn(true);
+			mv.visitLabel(endSetTrue);
+		}
 		return null;
 	}
 
@@ -264,8 +364,22 @@ public class CodeGenerator implements ASTVisitor, Opcodes {
 	public Object visitExpressionConditional(
 			ExpressionConditional expressionConditional, Object arg)
 			throws Exception {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
+		//TODO Fix This
+		Label startFalseLabel = new Label();
+		expressionConditional.guard.visit(this, arg);
+		mv.visitJumpInsn(IFEQ, startFalseLabel);
+
+		Label startTrueLabel = new Label();
+		mv.visitLabel(startTrueLabel);
+		expressionConditional.trueExpression.visit(this, arg);
+		Label endTrueLabel = new Label();
+		mv.visitLabel(endTrueLabel);
+
+		mv.visitLabel(startFalseLabel);
+		expressionConditional.falseExpression.visit(this, arg);
+		Label endFalseLabel = new Label();
+		mv.visitLabel(endFalseLabel);
+		return null;
 	}
 
 	@Override
@@ -347,8 +461,44 @@ public class CodeGenerator implements ASTVisitor, Opcodes {
 	public Object visitExpressionFunctionAppWithPixel(
 			ExpressionFunctionAppWithPixel expressionFunctionAppWithPixel,
 			Object arg) throws Exception {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
+		switch (expressionFunctionAppWithPixel.name) {
+			case KW_cart_x:
+				expressionFunctionAppWithPixel.e1.visit(this, arg);
+				mv.visitInsn(Opcodes.F2D);
+				mv.visitMethodInsn(Opcodes.INVOKESTATIC, "java/lang/Math", "cos", "(D)D", false);
+				mv.visitInsn(Opcodes.D2F);
+				expressionFunctionAppWithPixel.e0.visit(this, arg);
+				mv.visitInsn(FMUL);
+				mv.visitInsn(F2I);
+				break;
+			case KW_cart_y:
+				expressionFunctionAppWithPixel.e1.visit(this, arg);
+				mv.visitInsn(Opcodes.F2D);
+				mv.visitMethodInsn(Opcodes.INVOKESTATIC, "java/lang/Math", "sin", "(D)D", false);
+				mv.visitInsn(Opcodes.D2F);
+				expressionFunctionAppWithPixel.e0.visit(this, arg);
+				mv.visitInsn(FMUL);
+				mv.visitInsn(F2I);
+				break;
+			case KW_polar_a:
+				expressionFunctionAppWithPixel.e1.visit(this, arg);
+				mv.visitInsn(Opcodes.I2D);
+				expressionFunctionAppWithPixel.e0.visit(this, arg);
+				mv.visitInsn(Opcodes.I2D);
+				mv.visitMethodInsn(Opcodes
+						.INVOKESTATIC, "java/lang/Math", "atan2", "(DD)D", false);
+				mv.visitInsn(Opcodes.D2F);
+				break;
+			case KW_polar_r:
+				expressionFunctionAppWithPixel.e0.visit(this, arg);
+				mv.visitInsn(Opcodes.I2D);
+				expressionFunctionAppWithPixel.e1.visit(this, arg);
+				mv.visitInsn(Opcodes.I2D);
+				mv.visitMethodInsn(Opcodes.INVOKESTATIC, "java/lang/Math", "hypot", "(DD)D", false);
+				mv.visitInsn(Opcodes.D2F);
+				break;
+		}
+		return null;
 	}
 
 	@Override
@@ -385,16 +535,22 @@ public class CodeGenerator implements ASTVisitor, Opcodes {
 	@Override
 	public Object visitExpressionPixel(ExpressionPixel expressionPixel,
 			Object arg) throws Exception {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
+		mv.visitVarInsn(ALOAD,expressionPixel.dec.getSlot());
+		expressionPixel.pixelSelector.visit(this, arg);
+		mv.visitMethodInsn(Opcodes.INVOKESTATIC, RuntimeImageSupport.className, "getPixel", RuntimeImageSupport.getPixelSig, false);
+		return null;
 	}
 
 	@Override
 	public Object visitExpressionPixelConstructor(
 			ExpressionPixelConstructor expressionPixelConstructor, Object arg)
 			throws Exception {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
+		expressionPixelConstructor.alpha.visit(this, arg);
+		expressionPixelConstructor.red.visit(this, arg);
+		expressionPixelConstructor.green.visit(this, arg);
+		expressionPixelConstructor.blue.visit(this, arg);
+		mv.visitMethodInsn(Opcodes.INVOKESTATIC, RuntimePixelOps.className, "makePixel", RuntimePixelOps.makePixelSig, false);
+		return null;
 	}
 
 	@Override
@@ -464,9 +620,8 @@ public class CodeGenerator implements ASTVisitor, Opcodes {
 				mv.visitVarInsn(Opcodes.ISTORE, lhsIdent.dec.getSlot());
 				break;
 			case IMAGE:
-				//TODO Uncomment
 				mv.visitMethodInsn(Opcodes.INVOKESTATIC, RuntimeImageSupport.className,
-						"deepCopy", "(Ljava/awt/image/BufferedImage;)LBufferedImage", false);
+						"deepCopy", RuntimeImageSupport.deepCopySig, false);
 				mv.visitVarInsn(Opcodes.ASTORE, lhsIdent.dec.getSlot());
 				break;
 			case FILE:
@@ -478,22 +633,41 @@ public class CodeGenerator implements ASTVisitor, Opcodes {
 	@Override
 	public Object visitLHSPixel(LHSPixel lhsPixel, Object arg)
 			throws Exception {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
+		mv.visitVarInsn(Opcodes.ALOAD, lhsPixel.dec.getSlot());
+		lhsPixel.pixelSelector.visit(this, arg);
+		mv.visitMethodInsn(Opcodes.INVOKESTATIC, RuntimeImageSupport.className, "setPixel", RuntimeImageSupport.setPixelSig, false);
+		return null;
 	}
 
 	@Override
 	public Object visitLHSSample(LHSSample lhsSample, Object arg)
 			throws Exception {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
+		mv.visitVarInsn(Opcodes.ALOAD, lhsSample.dec.getSlot());
+		lhsSample.pixelSelector.visit(this, arg);
+		switch (lhsSample.color) {
+			case KW_alpha:
+				mv.visitLdcInsn(ICONST_0);
+				break;
+			case KW_red:
+				mv.visitLdcInsn(ICONST_1);
+				break;
+			case KW_green:
+				mv.visitLdcInsn(ICONST_2);
+				break;
+			case KW_blue:
+				mv.visitLdcInsn(ICONST_3);
+				break;
+		}
+		mv.visitMethodInsn(Opcodes.INVOKESTATIC, RuntimeImageSupport.updatePixelColorSig, "updatePixelColor", RuntimeImageSupport.setPixelSig, false);
+		return null;
 	}
 
 	@Override
 	public Object visitPixelSelector(PixelSelector pixelSelector, Object arg)
 			throws Exception {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
+		pixelSelector.ex.visit(this, arg);
+		pixelSelector.ey.visit(this, arg);
+		return null;
 	}
 
 	@Override
@@ -571,8 +745,16 @@ public class CodeGenerator implements ASTVisitor, Opcodes {
 	@Override
 	public Object visitStatementIf(StatementIf statementIf, Object arg)
 			throws Exception {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
+		Label jumpLabel = new Label();
+		statementIf.guard.visit(this, arg);
+		mv.visitJumpInsn(IFEQ, jumpLabel);
+		Label startIfLabel = new Label();
+		mv.visitLabel(startIfLabel);
+		statementIf.b.visit(this, arg);
+		Label endIfLabel = new Label();
+		mv.visitLabel(endIfLabel);
+		mv.visitLabel(jumpLabel);
+		return null;
 	}
 
 	@Override
@@ -593,13 +775,13 @@ public class CodeGenerator implements ASTVisitor, Opcodes {
 			case KW_image:
 				if(statementInput.dec.width != null && statementInput.dec.height != null) {
 					statementInput.dec.width.visit(this, arg);
+					mv.visitMethodInsn(Opcodes.INVOKESTATIC, "java/lang/Integer", "valueOf", "(I)Ljava/lang/Integer;", false);
 					statementInput.dec.height.visit(this, arg);
+					mv.visitMethodInsn(Opcodes.INVOKESTATIC, "java/lang/Integer", "valueOf", "(I)Ljava/lang/Integer;", false);
 				}
 				else  {
 					mv.visitInsn(ACONST_NULL);
 					mv.visitInsn(ACONST_NULL);
-//					mv.visitLdcInsn(NULL);
-//					mv.visitLdcInsn(NULL);
 				}
 				mv.visitMethodInsn(Opcodes.INVOKESTATIC, RuntimeImageSupport.className, "readImage", RuntimeImageSupport.readImageSig, false);
 				mv.visitVarInsn(Opcodes.ASTORE, statementInput.dec.getSlot());
@@ -677,15 +859,24 @@ public class CodeGenerator implements ASTVisitor, Opcodes {
 	@Override
 	public Object visitStatementWhile(StatementWhile statementWhile, Object arg)
 			throws Exception {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
+		Label loopAgain = new Label();
+		Label exitLoop = new Label();
+		mv.visitLabel(loopAgain);
+		statementWhile.guard.visit(this, arg);
+		mv.visitJumpInsn(IFEQ, exitLoop);
+		statementWhile.b.visit(this, arg);
+		mv.visitJumpInsn(GOTO, loopAgain);
+		mv.visitLabel(exitLoop);
+		return null;
 	}
 
 	@Override
 	public Object visitStatementWrite(StatementWrite statementWrite, Object arg)
 			throws Exception {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
+		mv.visitVarInsn(Opcodes.ALOAD, statementWrite.sourceDec.getSlot());
+		mv.visitVarInsn(Opcodes.ALOAD, statementWrite.destDec.getSlot());
+		mv.visitMethodInsn(Opcodes.INVOKESTATIC, RuntimeImageSupport.className, "write", RuntimeImageSupport.writeSig, false);
+		return null;
 	}
 
 }
