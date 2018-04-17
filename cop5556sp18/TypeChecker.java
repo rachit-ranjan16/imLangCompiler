@@ -330,6 +330,7 @@ public class TypeChecker implements ASTVisitor {
 
 	@Override
 	public Object visitExpressionPixel(ExpressionPixel expressionPixel, Object arg) throws Exception {
+		expressionPixel.pixelSelector.visit(this, arg);
 		expressionPixel.dec = symbolTable.lookup(expressionPixel.name);
 		if(expressionPixel.dec == null) error(expressionPixel.firstToken);
 		if(Types.getType(expressionPixel.dec.type) != Type.IMAGE) error(expressionPixel.firstToken);

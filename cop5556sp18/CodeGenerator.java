@@ -73,7 +73,6 @@ public class CodeGenerator implements ASTVisitor, Opcodes {
 
 	@Override
 	public Object visitBlock(Block block, Object arg) throws Exception {
-		// TODO refactor and extend as necessary
 		Label startBlock= new Label();
 		mv.visitLabel(startBlock);
 		Label endBlock = new Label();
@@ -230,13 +229,11 @@ public class CodeGenerator implements ASTVisitor, Opcodes {
 					mv.visitInsn(Opcodes.D2F);
 					break;
 				case OP_GE:
-					//TODO Fix This
 					mv.visitInsn(FCMPG);
 					mv.visitJumpInsn(IFGE, startSetTrue);
 					mv.visitLdcInsn(false);
 					break;
 				case OP_LE:
-					//TODO Fix This
 					mv.visitInsn(FCMPG);
 					// 1 <
 					// 0 ==
@@ -364,21 +361,24 @@ public class CodeGenerator implements ASTVisitor, Opcodes {
 	public Object visitExpressionConditional(
 			ExpressionConditional expressionConditional, Object arg)
 			throws Exception {
-		//TODO Fix This
 		Label startFalseLabel = new Label();
+		Label startTrueLabel = new Label();
+		Label endTrueLabel = new Label();
+		Label endFalseLabel = new Label();
+		Label exitLabel = new Label();
 		expressionConditional.guard.visit(this, arg);
 		mv.visitJumpInsn(IFEQ, startFalseLabel);
 
-		Label startTrueLabel = new Label();
 		mv.visitLabel(startTrueLabel);
 		expressionConditional.trueExpression.visit(this, arg);
-		Label endTrueLabel = new Label();
 		mv.visitLabel(endTrueLabel);
+		mv.visitJumpInsn(GOTO, exitLabel);
 
 		mv.visitLabel(startFalseLabel);
 		expressionConditional.falseExpression.visit(this, arg);
-		Label endFalseLabel = new Label();
 		mv.visitLabel(endFalseLabel);
+
+		mv.visitLabel(exitLabel);
 		return null;
 	}
 
@@ -672,7 +672,6 @@ public class CodeGenerator implements ASTVisitor, Opcodes {
 
 	@Override
 	public Object visitProgram(Program program, Object arg) throws Exception {
-		// TODO refactor and extend as necessary
 		cw = new ClassWriter(ClassWriter.COMPUTE_FRAMES);
 //		 cw = new ClassWriter(0); //If the call to mv.visitMaxs(1, 1) crashes,
 		// it is
@@ -801,7 +800,6 @@ public class CodeGenerator implements ASTVisitor, Opcodes {
 	public Object visitStatementShow(StatementShow statementShow, Object arg)
 			throws Exception {
 		/**
-		 * TODO refactor and complete implementation.
 		 * 
 		 * For integers, booleans, and floats, generate code to print to
 		 * console. For images, generate code to display in a frame.
