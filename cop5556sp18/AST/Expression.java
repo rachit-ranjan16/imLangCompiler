@@ -24,4 +24,7 @@ public abstract class Expression extends ASTNode {
 	public Types.Type type;
 	public Declaration dec;
 
+	public Types.Type getType() {
+		return type;
+	}
 }
