@@ -642,23 +642,25 @@ public class CodeGenerator implements ASTVisitor, Opcodes {
 	@Override
 	public Object visitLHSSample(LHSSample lhsSample, Object arg)
 			throws Exception {
+//		mv.visitVarInsn(Opcodes.ISTORE, lhsSample.dec.getSlot());
+//		mv.visitInsn(Opcodes.POP);
 		mv.visitVarInsn(Opcodes.ALOAD, lhsSample.dec.getSlot());
 		lhsSample.pixelSelector.visit(this, arg);
 		switch (lhsSample.color) {
 			case KW_alpha:
-				mv.visitLdcInsn(ICONST_0);
+				mv.visitLdcInsn(RuntimePixelOps.ALPHA);
 				break;
 			case KW_red:
-				mv.visitLdcInsn(ICONST_1);
+				mv.visitLdcInsn(RuntimePixelOps.RED);
 				break;
 			case KW_green:
-				mv.visitLdcInsn(ICONST_2);
+				mv.visitLdcInsn(RuntimePixelOps.GREEN);
 				break;
 			case KW_blue:
-				mv.visitLdcInsn(ICONST_3);
+				mv.visitLdcInsn(RuntimePixelOps.BLUE);
 				break;
 		}
-		mv.visitMethodInsn(Opcodes.INVOKESTATIC, RuntimeImageSupport.updatePixelColorSig, "updatePixelColor", RuntimeImageSupport.setPixelSig, false);
+		mv.visitMethodInsn(Opcodes.INVOKESTATIC, RuntimeImageSupport.className, "updatePixelColor", RuntimeImageSupport.updatePixelColorSig, false);
 		return null;
 	}
 

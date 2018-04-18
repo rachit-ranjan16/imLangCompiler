@@ -397,4 +397,36 @@ public class CodeGenTest {
 		assertEquals("entering main;leaving main;", RuntimeLog.globalLog.toString());
 
 	}
+
+
+	@Test
+	public void testFinalFailedCase() throws Exception {
+		String input;
+		byte[] bytecode;
+		String[] commandLineArgs = {};
+		input = "lhssample{ " +
+					"image im[512,256]; " +
+					"int x;" +
+					"\nint y; " +
+					"\nx := 0; " +
+					"\ny := 0; " +
+					"\nwhile (x < width(im)){ " +
+						"\ny := 0; " +
+				"		while (y < height(im)){" +
+							"\nalpha(im[x,y]) := 255;" +
+							"\n" +
+							"red(im[x,y]) := 0;" +
+							"\ngreen(im[x,y]) := x+y;" +
+							"\nblue(im[x,y]) := 0; " +
+							"\ny := y + 1; " +
+						"\n};" +
+						"\nx := x + 1;" +
+					"};" +
+					"\nshow im; sleep 3000;" +
+				"\n}";
+		bytecode = genCode(input);
+		runCode("lhssample", bytecode, commandLineArgs);
+		show("Log:\n"+RuntimeLog.globalLog);
+		assertEquals("entering main;leaving main;",RuntimeLog.globalLog.toString());
+	}
 }

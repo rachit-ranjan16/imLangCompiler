@@ -23,7 +23,7 @@ public class SymbolTable {
         scopeStack.push(currentScope);
     }
 
-    public void leaveScope() { ;
+    public void leaveScope() {
         scopeStack.pop();
         currentScope = scopeStack.peek();
 
